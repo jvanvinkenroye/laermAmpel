@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Blender-Sicherungskopien
+*.blend1
+*.blend2
+
+# Werkzeuge / Vorschauen
+.playwright-mcp/
+.clearance-rendered-preview-*/
