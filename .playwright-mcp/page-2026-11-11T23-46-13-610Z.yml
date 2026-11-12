@@ -1,0 +1,137 @@
+- generic [active] [ref=f4e1]:
+  - banner [ref=f4e2]:
+    - generic [ref=f4e3]:
+      - heading "Lärmampel Simulator" [level=1] [ref=f4e4]
+      - paragraph [ref=f4e5]: Zwei Bauformen mit WS2812B-LEDs zum Vergleichen. Messlogik (Leq, Hysterese, Spitzenwert, Dauer-Rot) wie für die Firmware geplant.
+    - generic [ref=f4e6]:
+      - img "Makerspace Uni Stuttgart" [ref=f4e7]
+      - img "TIK" [ref=f4e8]
+  - main [ref=f4e10]:
+    - generic [ref=f4e11]:
+      - generic [ref=f4e14]:
+        - heading "Messwerte" [level=2] [ref=f4e15]
+        - generic [ref=f4e16]:
+          - generic [ref=f4e17]:
+            - generic [ref=f4e18]: Momentan
+            - text: "-"
+          - generic [ref=f4e19]:
+            - generic [ref=f4e20]: Leq Bogen
+            - text: "-"
+          - generic [ref=f4e21]:
+            - generic [ref=f4e22]: Leq Ziffern
+            - text: "-"
+          - generic [ref=f4e23]:
+            - generic [ref=f4e24]: Spitzenwert
+            - text: "-"
+          - generic [ref=f4e25]:
+            - generic [ref=f4e26]: Zone
+            - text: "-"
+          - generic [ref=f4e27]:
+            - generic [ref=f4e28]: Rot seit
+            - text: "-"
+          - generic [ref=f4e29]:
+            - generic [ref=f4e30]: LED-Strom
+            - text: "-"
+          - generic [ref=f4e31]:
+            - generic [ref=f4e32]: Gesamt mit Pi
+            - text: "-"
+      - heading "Verlauf Leq Ziffern, letzte 2 Minuten" [level=2] [ref=f4e34]
+    - complementary [ref=f4e36]:
+      - generic [ref=f4e37]:
+        - heading "Variante" [level=2] [ref=f4e38]
+        - generic [ref=f4e39]:
+          - button "Tacho-Scheibe" [ref=f4e40] [cursor=pointer]
+          - button "Farbkreis + Display" [ref=f4e41] [cursor=pointer]
+        - paragraph [ref=f4e42]: Runde Scheibe, 45-LED-Bogen als Pegelanzeige, Ziffern in der Mitte. 87 LEDs.
+      - generic [ref=f4e43]:
+        - heading "Quelle" [level=2] [ref=f4e44]
+        - generic [ref=f4e45]:
+          - button "Klassenraum" [ref=f4e46] [cursor=pointer]
+          - button "Schieberegler" [ref=f4e47] [cursor=pointer]
+          - button "Mikrofon" [ref=f4e48] [cursor=pointer]
+        - generic [ref=f4e49]:
+          - generic [ref=f4e50]:
+            - button "Automatisch" [ref=f4e51] [cursor=pointer]
+            - button "Stillarbeit" [ref=f4e52] [cursor=pointer]
+            - button "Unterricht" [ref=f4e53] [cursor=pointer]
+            - button "Gruppenarbeit" [ref=f4e54] [cursor=pointer]
+            - button "Pause" [ref=f4e55] [cursor=pointer]
+          - button "Tuer knallt" [ref=f4e56] [cursor=pointer]
+          - paragraph [ref=f4e57]: "Aktuell: Gruppenarbeit, Wechsel in 18 s"
+      - generic [ref=f4e58]:
+        - generic [ref=f4e59]:
+          - heading "Skala und Schwellen" [level=2] [ref=f4e60]
+          - generic [ref=f4e61]:
+            - generic [ref=f4e62]: Skala Anfang
+            - status [ref=f4e63]: 40 dB
+            - slider "Skala Anfang" [ref=f4e64]: "40"
+          - generic [ref=f4e65]:
+            - generic [ref=f4e66]: Skala Ende
+            - status [ref=f4e67]: 85 dB
+            - slider "Skala Ende" [ref=f4e68]: "85"
+          - generic [ref=f4e69]:
+            - generic [ref=f4e70]: Gelb ab
+            - status [ref=f4e71]: 60 dB
+            - slider "Gelb ab" [ref=f4e72]: "60"
+          - generic [ref=f4e73]:
+            - generic [ref=f4e74]: Rot ab
+            - status [ref=f4e75]: 70 dB
+            - slider "Rot ab" [ref=f4e76]: "70"
+        - generic [ref=f4e77]:
+          - heading "Darstellung" [level=2] [ref=f4e78]
+          - generic [ref=f4e79]:
+            - generic [ref=f4e80]: Helligkeit
+            - status [ref=f4e81]: 70 %
+            - slider "Helligkeit" [ref=f4e82]: "70"
+          - generic [ref=f4e83]:
+            - generic [ref=f4e84]: Skala im Hintergrund
+            - status [ref=f4e85]: 5 %
+            - slider "Skala im Hintergrund" [ref=f4e86]: "5"
+          - generic [ref=f4e87]:
+            - generic [ref=f4e88]: Streuung Diffusor
+            - status [ref=f4e89]: 1.2 x
+            - slider "Streuung Diffusor" [ref=f4e90]: "1.2"
+          - generic [ref=f4e91]:
+            - checkbox "Farbverlauf an den Zonengrenzen" [checked] [ref=f4e92]
+            - text: Farbverlauf an den Zonengrenzen
+          - generic [ref=f4e93]:
+            - checkbox "Lichtkammern (LEDs/Segmente getrennt)" [checked] [ref=f4e94]
+            - text: Lichtkammern (LEDs/Segmente getrennt)
+        - generic [ref=f4e95]:
+          - heading "Zeitverhalten" [level=2] [ref=f4e96]
+          - generic [ref=f4e97]:
+            - generic [ref=f4e98]: "Bogen: Mittelung"
+            - status [ref=f4e99]: 250 ms
+            - 'slider "Bogen: Mittelung" [ref=f4e100]': "250"
+          - generic [ref=f4e101]:
+            - generic [ref=f4e102]: "Bogen: max. Abfall"
+            - status [ref=f4e103]: 10 dB/s
+            - 'slider "Bogen: max. Abfall" [ref=f4e104]': "10"
+          - generic [ref=f4e105]:
+            - generic [ref=f4e106]: "Ziffern: Mittelung"
+            - status [ref=f4e107]: 1.5 s
+            - 'slider "Ziffern: Mittelung" [ref=f4e108]': "1.5"
+          - generic [ref=f4e109]:
+            - generic [ref=f4e110]: Spitzenwert halten
+            - status [ref=f4e111]: 3 s
+            - slider "Spitzenwert halten" [ref=f4e112]: "3"
+          - generic [ref=f4e113]:
+            - generic [ref=f4e114]: Hysterese Zonen
+            - status [ref=f4e115]: 2 dB
+            - slider "Hysterese Zonen" [ref=f4e116]: "2"
+          - generic [ref=f4e117]:
+            - generic [ref=f4e118]: Haltezeit Zonenwechsel
+            - status [ref=f4e119]: 2 s
+            - slider "Haltezeit Zonenwechsel" [ref=f4e120]: "2"
+          - generic [ref=f4e121]:
+            - generic [ref=f4e122]: Dauer-Rot pulsiert ab
+            - status [ref=f4e123]: 5 s
+            - slider "Dauer-Rot pulsiert ab" [ref=f4e124]: "5"
+      - generic [ref=f4e125]:
+        - heading "Umgebung" [level=2] [ref=f4e126]
+        - generic [ref=f4e127]:
+          - checkbox "Raum abgedunkelt" [ref=f4e128]
+          - text: Raum abgedunkelt
+        - group [ref=f4e129]:
+          - generic "Einstellungen als JSON (fuer die Firmware)" [ref=f4e130] [cursor=pointer]
+  - contentinfo [ref=f4e131]: Makerspace Uni Stuttgart · Lärmampel-Projekt · Simulation, keine geeichte Messung
