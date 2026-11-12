@@ -126,12 +126,12 @@ def build():
     wood = new_mat("Pappel", base=(0.60, 0.46, 0.30), rough=0.6)
     wall = new_mat("Wand", base=(0.80, 0.78, 0.74), rough=0.92)
     smoke = new_mat("Rauchglas", base=(0.012, 0.012, 0.014), rough=0.06, coat=0.6)
-    seg_off = new_mat("Segment aus", base=(0.02, 0.02, 0.022), rough=0.25)
-    seg_on = new_mat("Segment an", base=(0.05, 0.05, 0.05), rough=0.3, emit=(0, 1, 0), strength=9.0)
+    seg_off = new_mat("Segment aus", base=(0.006, 0.006, 0.007), rough=0.4)
+    seg_on = new_mat("Segment an", base=(0.05, 0.05, 0.05), rough=0.3, emit=(0, 1, 0), strength=2.2)
     screw = new_mat("Schraube", base=(0.03, 0.03, 0.03), rough=0.35, metal=1.0)
     engrave = new_mat("Gravur", base=(0.35, 0.35, 0.36), rough=0.9)
     hole = new_mat("Loch", base=(0.0, 0.0, 0.0), rough=1.0)
-    halo = new_mat("Halo", base=(0, 0, 0), emit=(0, 1, 0), strength=60.0)
+    halo = new_mat("Halo", base=(0, 0, 0), emit=(0, 1, 0), strength=25.0)
 
     # Wand
     prism("Wand", [(-2, -1.2), (2, -1.2), (2, 1.2), (-2, 1.2)], 0.0, 0.02, wall)
@@ -142,7 +142,8 @@ def build():
     # Farbkreis: Holzkoerper + Opalscheibe mit radialer Helligkeit
     R = KREIS_D / 2 * MM
     cylinder_y("Kreis_Holz", KREIS_C, 0, R, y_wood, DEPTH * MM, wood, n=128).modifiers.new("B", "BEVEL").width = 0.0015
-    opal = new_mat("Opal", base=(0.9, 0.9, 0.9), rough=0.35, emit=(0, 1, 0), strength=1.0)
+    # dunkle Grundfarbe, damit das Raumlicht die LED-Farbe nicht ausbleicht
+    opal = new_mat("Opal", base=(0.22, 0.22, 0.22), rough=0.35, emit=(0, 1, 0), strength=1.0)
     nt = opal.node_tree
     tc = nt.nodes.new("ShaderNodeTexCoord")
     sep = nt.nodes.new("ShaderNodeSeparateXYZ")
@@ -160,7 +161,7 @@ def build():
     rim.inputs["To Max"].default_value = 0.12
     mul = nt.nodes.new("ShaderNodeMath"); mul.operation = "MULTIPLY"
     gain = nt.nodes.new("ShaderNodeMath"); gain.operation = "MULTIPLY"
-    gain.inputs[1].default_value = 7.0
+    gain.inputs[1].default_value = 2.2
     gain.name = "Gain"
     nt.links.new(tc.outputs["Object"], sep.inputs[0])
     nt.links.new(sep.outputs["X"], comb.inputs["X"])
@@ -176,8 +177,9 @@ def build():
     disc.location.x = KREIS_C  # Objektursprung in der Kreismitte fuer die Radialmaske
 
     # Halo-Emitter hinter dem Kreisrand, fuer die Kamera unsichtbar
-    bpy.ops.mesh.primitive_torus_add(major_radius=R - 0.004, minor_radius=0.004,
-                                     location=(KREIS_C, -0.006, 0), rotation=(math.radians(90), 0, 0))
+    # liegt knapp ausserhalb des Holzkoerpers zwischen Gehaeuserand und Wand
+    bpy.ops.mesh.primitive_torus_add(major_radius=R + 0.006, minor_radius=0.003,
+                                     location=(KREIS_C, -0.008, 0), rotation=(math.radians(90), 0, 0))
     h = bpy.context.active_object
     h.name = "Halo"
     h.data.materials.append(halo)
@@ -285,13 +287,9 @@ def build():
         sc.cycles.device = "GPU"
     except Exception as err:  # CPU-Rendering funktioniert auch, nur langsamer
         print("GPU nicht verfuegbar:", err)
-    sc.view_settings.view_transform = "AgX"
-    for look in ("AgX - Punchy", "Punchy"):
-        try:
-            sc.view_settings.look = look
-            break
-        except TypeError:
-            continue
+    # "Standard" statt AgX: AgX entsaettigt helle Emission, LED-Farben wirken dann blass
+    sc.view_settings.view_transform = "Standard"
+    sc.view_settings.look = "None"
 
     return opal, halo, seg_on, seg_off, segs
 
@@ -303,7 +301,7 @@ def main():
         for m in (opal, halo, seg_on):
             principled(m).inputs["Emission Color"].default_value = (*col, 1)
         # Gelb wirkt durch zwei aktive Kanaele heller, deshalb leicht absenken
-        opal.node_tree.nodes["Gain"].inputs[1].default_value = 5.0 if name == "gelb" else 7.0
+        opal.node_tree.nodes["Gain"].inputs[1].default_value = 1.7 if name == "gelb" else 2.2
         for (di, seg), obj in segs.items():
             obj.data.materials[0] = seg_on if seg in DIGITS[digits[di]] else seg_off
         bpy.context.scene.render.filepath = str(OUT / f"laermampel_{name}.png")
