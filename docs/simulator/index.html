@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lärmampel Simulator</title>
+<style>
+  /* Makerspace Uni Stuttgart - Farben und Schriften aus makerspaceTemplate/lib.typ */
+  @font-face { font-family: "Baloo"; src: url("assets/fonts/Baloo-Regular.ttf") format("truetype"); font-weight: 400; }
+  @font-face { font-family: "UniStuttgart"; src: url("assets/fonts/UniStuttgartSans-Light.ttf") format("truetype"); font-weight: 300 400; }
+  @font-face { font-family: "UniStuttgart"; src: url("assets/fonts/UniStuttgartSans-Bold.ttf") format("truetype"); font-weight: 600 700; }
+  :root {
+    --ms-anthrazit: #3A3D40;
+    --ms-blau: #007FE1;
+    --ms-magenta: #D13788;
+    --ms-gruen: #38C23A;
+    --ms-grau-hg: #F2F4F6;
+    --ms-warn-bg: #fff0f4;
+    --bg: #ffffff;
+    --panel: var(--ms-grau-hg);
+    --panel-2: #ffffff;
+    --line: #dde2e8;
+    --text: var(--ms-anthrazit);
+    --muted: #6c7279;
+    --accent: var(--ms-blau);
+    --wall-light: #ebe8e2;
+    --wall-dark: #2b2e33;
+    --font-display: "Baloo", Arial, "Helvetica Neue", sans-serif;
+    --font-body: "UniStuttgart", Arial, "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.45 var(--font-body);
+  }
+  header {
+    max-width: 1440px; margin: 0 auto; padding: 18px 20px 0;
+    display: flex; align-items: center; gap: 20px;
+  }
+  header .titles { flex: 1; min-width: 0; }
+  header .logos { display: flex; align-items: center; gap: 16px; }
+  header .logos img { height: 52px; width: auto; display: block; }
+  header .logos img.tik { height: 58px; }
+  h1 {
+    font-family: var(--font-display); font-weight: 400; font-size: 32px; line-height: 1.1;
+    margin: 0; color: var(--ms-anthrazit);
+  }
+  header p { margin: 2px 0 0; color: var(--muted); }
+  .titleline {
+    max-width: 1400px; margin: 10px auto 0; height: 0;
+    border-top: 1.5px solid var(--ms-magenta);
+  }
+  @media (max-width: 700px) {
+    header { flex-direction: column-reverse; align-items: flex-start; padding: 16px 16px 0; }
+    h1 { font-size: 26px; }
+    .titleline { margin: 10px 16px 0; }
+  }
+  main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+  @media (max-width: 960px) { main { grid-template-columns: 1fr; padding: 16px; } }
+
+  .stage { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .wall {
+    position: relative;
+    border-radius: 4px;
+    padding: 28px;
+    display: flex;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 30%, #f6f4f0, var(--wall-light) 70%);
+    transition: background .4s;
+  }
+  .wall.dark { background: radial-gradient(ellipse at 50% 30%, #363a40, var(--wall-dark) 70%); }
+  .wall .spacie {
+    position: absolute; right: 14px; bottom: 10px; height: 110px; width: auto;
+    pointer-events: none;
+  }
+  @media (max-width: 700px) { .wall { padding: 16px; } .wall .spacie { height: 64px; } }
+  #disc { width: 100%; max-width: 620px; aspect-ratio: 1; display: block; position: relative; }
+
+  /* ms-box: grauer Block, Titel in Baloo, Versalien, farbig */
+  .card { background: var(--panel); border-radius: 4px; padding: 12px 14px; }
+  .card h2 {
+    font-family: var(--font-display); font-weight: 400; font-size: 17px; letter-spacing: .02em;
+    text-transform: uppercase; color: var(--ms-blau); margin: 0 0 6px;
+  }
+  .card.magenta h2 { color: var(--ms-magenta); }
+  #history { width: 100%; height: 150px; display: block; background: #fff; border-radius: 4px; }
+
+  .readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+  .ro { background: var(--panel-2); border-radius: 4px; padding: 8px 10px; border-left: 3px solid var(--ms-blau); }
+  .ro span { display: block; font-size: 12px; color: var(--muted); }
+  .ro b { font-size: 19px; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .warn { color: var(--ms-magenta); }
+
+  aside { display: flex; flex-direction: column; gap: 12px; }
+  .row { display: grid; grid-template-columns: 1fr 86px; gap: 2px 10px; align-items: center; margin: 6px 0; }
+  .row label { color: var(--text); }
+  .row output { text-align: right; color: var(--ms-blau); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .row input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--ms-blau); }
+  .check { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+  .check input { accent-color: var(--ms-blau); width: 16px; height: 16px; }
+
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+  .seg button, button.btn {
+    background: #fff; color: var(--text); border: 1px solid var(--line);
+    border-radius: 4px; padding: 6px 11px; font: inherit; cursor: pointer;
+  }
+  .seg button.on { background: var(--ms-blau); border-color: var(--ms-blau); color: #fff; font-weight: 700; }
+  button.btn:hover, .seg button:not(.on):hover { border-color: var(--ms-blau); color: var(--ms-blau); }
+  button.btn:disabled { color: var(--ms-gruen); border-color: var(--ms-gruen); cursor: default; }
+  #btnDoor { border-left: 3px solid var(--ms-magenta); }
+  .srcpane { display: none; }
+  .srcpane.on { display: block; }
+  .hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+  pre {
+    background: #fff; border-radius: 4px; padding: 10px; margin: 8px 0 0;
+    font-size: 12px; overflow-x: auto; color: var(--ms-anthrazit);
+  }
+  details summary { cursor: pointer; color: var(--ms-blau); }
+  footer {
+    max-width: 1400px; margin: 4px auto 24px; padding: 10px 0 0; color: var(--muted); font-size: 13px;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 960px) { footer { margin: 4px 16px 24px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="titles">
+    <h1>Lärmampel Simulator</h1>
+    <p><a href="../index.html">Zurück zur Projektseite</a></p>
+    <p>Zwei Bauformen mit WS2812B-LEDs zum Vergleichen. Messlogik (Leq, Hysterese, Spitzenwert, Dauer-Rot) wie für die Firmware geplant.</p>
+  </div>
+  <div class="logos">
+    <img src="assets/logos/Makerspace.svg" alt="Makerspace Uni Stuttgart">
+    <img class="tik" src="assets/logos/tik-logo.svg" alt="TIK">
+  </div>
+</header>
+<div class="titleline"></div>
+
+<main>
+  <section class="stage">
+    <div class="wall" id="wall">
+      <canvas id="disc"></canvas>
+      <img class="spacie" src="assets/logos/spacie-green.svg" alt="">
+    </div>
+
+    <div class="card">
+      <h2>Messwerte</h2>
+      <div class="readouts">
+        <div class="ro"><span>Momentan</span><b id="roInst">-</b></div>
+        <div class="ro"><span>Leq Bogen</span><b id="roFast">-</b></div>
+        <div class="ro"><span>Leq Ziffern</span><b id="roSlow">-</b></div>
+        <div class="ro"><span>Spitzenwert</span><b id="roPeak">-</b></div>
+        <div class="ro"><span>Zone</span><b id="roZone">-</b></div>
+        <div class="ro"><span>Rot seit</span><b id="roRed">-</b></div>
+        <div class="ro"><span>LED-Strom</span><b id="roAmp">-</b></div>
+        <div class="ro"><span>Gesamt mit Pi</span><b id="roAmpTot">-</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Verlauf Leq Ziffern, letzte 2 Minuten</h2>
+      <canvas id="history"></canvas>
+    </div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <h2>Variante</h2>
+      <div class="seg" id="varSeg">
+        <button data-var="tacho" class="on">Tacho-Scheibe</button>
+        <button data-var="kreis">Farbkreis + Display</button>
+      </div>
+      <p class="hint" id="varInfo"></p>
+    </div>
+
+    <div class="card">
+      <h2>Quelle</h2>
+      <div class="seg" id="srcSeg">
+        <button data-src="sim" class="on">Klassenraum</button>
+        <button data-src="manual">Schieberegler</button>
+        <button data-src="mic">Mikrofon</button>
+      </div>
+
+      <div class="srcpane on" data-pane="sim">
+        <div class="seg" id="modeSeg">
+          <button data-mode="auto" class="on">Automatisch</button>
+          <button data-mode="still">Stillarbeit</button>
+          <button data-mode="unterricht">Unterricht</button>
+          <button data-mode="gruppe">Gruppenarbeit</button>
+          <button data-mode="chaos">Pause</button>
+        </div>
+        <button class="btn" id="btnDoor">Tür knallt</button>
+        <p class="hint" id="simInfo"></p>
+      </div>
+
+      <div class="srcpane" data-pane="manual">
+        <div class="row">
+          <label for="manual">Pegel</label><output id="manualOut">55 dB</output>
+          <input type="range" id="manual" min="25" max="100" step="0.5" value="55">
+        </div>
+      </div>
+
+      <div class="srcpane" data-pane="mic">
+        <button class="btn" id="btnMic">Mikrofon starten</button>
+        <div class="row">
+          <label for="micOffset">Kalibrier-Offset</label><output id="micOffsetOut">100 dB</output>
+          <input type="range" id="micOffset" min="60" max="140" step="1" value="100">
+        </div>
+        <p class="hint" id="micInfo">Pegel = dBFS + Offset. Ohne A-Bewertung und unkalibriert,
+          Browser-Mikrofone sind nur relativ brauchbar. Offset gegen eine Messgerät-App abgleichen.</p>
+      </div>
+    </div>
+
+    <div id="controls"></div>
+
+    <div class="card magenta">
+      <h2>Umgebung</h2>
+      <label class="check"><input type="checkbox" id="darkRoom"> Raum abgedunkelt</label>
+      <details>
+        <summary>Einstellungen als JSON (für die Firmware)</summary>
+        <pre id="json"></pre>
+      </details>
+    </div>
+  </aside>
+</main>
+<footer>Makerspace Uni Stuttgart · Lärmampel-Projekt · Simulation, keine geeichte Messung</footer>
+
+<script>
+"use strict";
+
+// ---------- Parameter ----------
+const P = {
+  min: 40, max: 85, t1: 60, t2: 70,
+  bright: 70, bg: 5, spread: 1.2, gradient: true, chambers: true, halo: true,
+  fastWin: 250, fall: 10, slowWin: 1.5, peakHold: 3, hyst: 2, zoneHold: 2, redDelay: 5,
+};
+
+const CONTROLS = [
+  { title: "Skala und Schwellen", ranges: [
+    ["min", "Skala Anfang", 20, 60, 1, "dB"],
+    ["max", "Skala Ende", 65, 110, 1, "dB"],
+    ["t1", "Gelb ab", 30, 95, 1, "dB"],
+    ["t2", "Rot ab", 35, 100, 1, "dB"],
+  ]},
+  { title: "Darstellung", ranges: [
+    ["bright", "Helligkeit", 5, 100, 1, "%"],
+    ["bg", "Skala im Hintergrund", 0, 20, 1, "%"],
+    ["spread", "Streuung Diffusor", 0.5, 2.5, 0.1, "x"],
+  ], checks: [
+    ["gradient", "Farbverlauf an den Zonengrenzen"],
+    ["chambers", "Lichtkammern (LEDs/Segmente getrennt)"],
+    ["halo", "Halo an der Wand (Farbkreis)"],
+  ]},
+  { title: "Zeitverhalten", ranges: [
+    ["fastWin", "Bogen: Mittelung", 50, 1000, 10, "ms"],
+    ["fall", "Bogen: max. Abfall", 2, 40, 1, "dB/s"],
+    ["slowWin", "Ziffern: Mittelung", 0.5, 5, 0.1, "s"],
+    ["peakHold", "Spitzenwert halten", 0, 10, 0.5, "s"],
+    ["hyst", "Hysterese Zonen", 0, 6, 0.5, "dB"],
+    ["zoneHold", "Haltezeit Zonenwechsel", 0, 6, 0.5, "s"],
+    ["redDelay", "Dauer-Rot pulsiert ab", 1, 30, 1, "s"],
+  ]},
+];
+
+const N_ARC = 45;
+const LED_MA = 20;          // mA pro Farbkanal bei voller Helligkeit
+const PI_MA = 500;
+const GREEN = [0, 255, 40], YELLOW = [255, 160, 0], RED = [255, 25, 0], WHITE = [255, 255, 255];
+const ZONE_COLORS = [GREEN, YELLOW, RED];
+const ZONE_NAMES = ["gruen", "gelb", "rot"];
+const DIGITS = {
+  "0": "abcdef", "1": "bc", "2": "abdeg", "3": "abcdg", "4": "bcfg", "5": "acdfg",
+  "6": "acdefg", "7": "abc", "8": "abcdefg", "9": "abcdfg", " ": "", "-": "g",
+  "H": "bcefg", "I": "bc",
+};
+
+// ---------- UI aufbauen ----------
+const $ = (s) => document.querySelector(s);
+const inputs = {};
+
+function fmt(v, unit) {
+  const s = Number.isInteger(v) ? String(v) : v.toFixed(1);
+  return `${s} ${unit}`;
+}
+
+function buildControls() {
+  const host = $("#controls");
+  for (const grp of CONTROLS) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<h2>${grp.title}</h2>`;
+    for (const [key, label, min, max, step, unit] of grp.ranges) {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `<label for="c_${key}">${label}</label><output></output>
+        <input type="range" id="c_${key}" min="${min}" max="${max}" step="${step}">`;
+      const inp = row.querySelector("input");
+      const out = row.querySelector("output");
+      inputs[key] = { inp, out, unit };
+      inp.addEventListener("input", () => { P[key] = parseFloat(inp.value); validate(key); syncControls(); });
+      card.appendChild(row);
+    }
+    for (const [key, label] of grp.checks || []) {
+      const lab = document.createElement("label");
+      lab.className = "check";
+      lab.innerHTML = `<input type="checkbox" id="c_${key}"> ${label}`;
+      const inp = lab.querySelector("input");
+      inputs[key] = { inp };
+      inp.addEventListener("change", () => { P[key] = inp.checked; syncControls(); });
+      card.appendChild(lab);
+    }
+    host.appendChild(card);
+  }
+}
+
+// Reihenfolge min < t1 < t2 < max erzwingen, der zuletzt bewegte Regler gewinnt
+function validate(changed) {
+  const gap = 1;
+  if (changed === "min") { P.t1 = Math.max(P.t1, P.min + gap); P.t2 = Math.max(P.t2, P.t1 + gap); P.max = Math.max(P.max, P.t2 + gap); }
+  if (changed === "max") { P.t2 = Math.min(P.t2, P.max - gap); P.t1 = Math.min(P.t1, P.t2 - gap); P.min = Math.min(P.min, P.t1 - gap); }
+  if (changed === "t1") { P.t1 = Math.min(Math.max(P.t1, P.min + gap), P.max - 2 * gap); P.t2 = Math.max(P.t2, P.t1 + gap); }
+  if (changed === "t2") { P.t2 = Math.max(Math.min(P.t2, P.max - gap), P.min + 2 * gap); P.t1 = Math.min(P.t1, P.t2 - gap); }
+}
+
+function syncControls() {
+  for (const [key, c] of Object.entries(inputs)) {
+    if (c.inp.type === "checkbox") c.inp.checked = P[key];
+    else { c.inp.value = P[key]; c.out.textContent = fmt(P[key], c.unit); }
+  }
+  $("#json").textContent = JSON.stringify({ ...P, leds: { arc: N_ARC, digits: 2, ledsPerSegment: 3 } }, null, 2);
+}
+
+// ---------- Quellen ----------
+let src = "sim";
+let simMode = "auto", autoMode = "unterricht", autoTimer = 0;
+let simBase = 50, simNoise = 0, simFlicker = 0, spike = -100;
+const SIM_TARGETS = { still: 38, unterricht: 54, gruppe: 66, chaos: 78 };
+const SIM_LABELS = { still: "Stillarbeit", unterricht: "Unterricht", gruppe: "Gruppenarbeit", chaos: "Pause" };
+
+let audioCtx = null, analyser = null, micBuf = null;
+
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function addDb(a, b) { return 10 * Math.log10(10 ** (a / 10) + 10 ** (b / 10)); }
+
+function simulate(dt) {
+  if (simMode === "auto") {
+    autoTimer -= dt;
+    if (autoTimer <= 0) {
+      const pool = ["still", "unterricht", "unterricht", "gruppe", "gruppe", "chaos"];
+      autoMode = pool[Math.floor(Math.random() * pool.length)];
+      autoTimer = 15 + Math.random() * 25;
+    }
+  }
+  const mode = simMode === "auto" ? autoMode : simMode;
+  const target = SIM_TARGETS[mode];
+  // traege Grundlautstaerke, langsames Rauschen (Ornstein-Uhlenbeck), schnelles Sprachflackern
+  simBase += (target - simBase) * Math.min(1, dt / 4);
+  simNoise += (-simNoise / 1.5) * dt + randn() * 3 * Math.sqrt(dt);
+  simFlicker += (-simFlicker / 0.08) * dt + randn() * 10 * Math.sqrt(dt);
+  spike -= 60 * dt;
+  if (Math.random() < dt * 0.015 * (target / 50)) spike = target + 12 + Math.random() * 8;
+  $("#simInfo").textContent = simMode === "auto"
+    ? `Aktuell: ${SIM_LABELS[mode]}, Wechsel in ${Math.ceil(autoTimer)} s` : `Zielpegel ca. ${target} dB`;
+  return addDb(simBase + simNoise + simFlicker, spike);
+}
+
+function readMic() {
+  if (!analyser) return 30;
+  analyser.getFloatTimeDomainData(micBuf);
+  let s = 0;
+  for (let i = 0; i < micBuf.length; i++) s += micBuf[i] * micBuf[i];
+  const rms = Math.sqrt(s / micBuf.length);
+  return 20 * Math.log10(rms + 1e-9) + parseFloat($("#micOffset").value);
+}
+
+async function startMic() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+    });
+    audioCtx = new AudioContext();
+    const source = audioCtx.createMediaStreamSource(stream);
+    // Hochpass gegen Trittschall und DC, ersetzt keine A-Bewertung
+    const hp = audioCtx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 80;
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    micBuf = new Float32Array(analyser.fftSize);
+    source.connect(hp).connect(analyser);
+    $("#btnMic").textContent = "Mikrofon läuft";
+    $("#btnMic").disabled = true;
+  } catch (err) {
+    $("#micInfo").textContent = `Mikrofon nicht verfügbar: ${err.message}. ` +
+      "Seite ggf. über http://localhost ausliefern statt als Datei oeffnen.";
+  }
+}
+
+// ---------- Messlogik (wie Firmware) ----------
+let tNow = 0;
+let buf = [];
+let inst = 40, leqFast = 40, leqSlow = 40, arcLevel = 40, peak = 40, peakT = 0;
+let zone = 0, pendZone = 0, pendT = 0, redT = 0;
+let digitVal = null, digitT = 0, histT = 0, roT = 0;
+const history = [];
+
+function leq(win) {
+  let s = 0, n = 0;
+  for (let i = buf.length - 1; i >= 0 && buf[i].t >= tNow - win; i--) { s += buf[i].e; n++; }
+  return n ? 10 * Math.log10(s / n) : 0;
+}
+
+function thrOf(z) { return z === 2 ? P.t2 : P.t1; }
+
+function update(dt) {
+  tNow += dt;
+  if (src === "sim") inst = simulate(dt);
+  else if (src === "manual") inst = parseFloat($("#manual").value) + randn() * 0.4;
+  else inst = readMic();
+  inst = Math.max(0, Math.min(130, inst));
+
+  buf.push({ t: tNow, e: 10 ** (inst / 10) });
+  const keep = Math.max(P.slowWin, P.fastWin / 1000) + 0.2;
+  while (buf.length && buf[0].t < tNow - keep) buf.shift();
+
+  leqFast = leq(P.fastWin / 1000);
+  leqSlow = leq(P.slowWin);
+
+  arcLevel = Math.max(leqFast, arcLevel - P.fall * dt);
+
+  if (leqFast >= peak) { peak = leqFast; peakT = 0; }
+  else {
+    peakT += dt;
+    if (peakT > P.peakHold) peak = Math.max(arcLevel, peak - 8 * dt);
+  }
+
+  // Zone mit Hysterese (nur abwaerts) und Haltezeit (beide Richtungen)
+  const up = leqSlow >= P.t2 ? 2 : leqSlow >= P.t1 ? 1 : 0;
+  let cand;
+  if (up > zone) cand = up;
+  else {
+    cand = zone;
+    while (cand > 0 && leqSlow < thrOf(cand) - P.hyst) cand--;
+  }
+  if (cand !== zone) {
+    if (cand !== pendZone) { pendZone = cand; pendT = 0; }
+    pendT += dt;
+    if (pendT >= P.zoneHold) { zone = cand; pendT = 0; }
+  } else { pendZone = zone; pendT = 0; }
+
+  redT = zone === 2 ? redT + dt : 0;
+
+  digitT += dt;
+  if (digitVal === null || digitT >= 0.5) { digitVal = Math.round(leqSlow); digitT = 0; }
+
+  histT += dt;
+  if (histT >= 0.2) {
+    history.push({ v: leqSlow, z: zone });
+    if (history.length > 600) history.shift();
+    histT = 0;
+  }
+}
+
+// ---------- Farben ----------
+function mix(a, b, t) {
+  t = Math.max(0, Math.min(1, t));
+  return [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * t);
+}
+
+function colorForLevel(v) {
+  if (!P.gradient) return v < P.t1 ? GREEN : v < P.t2 ? YELLOW : RED;
+  const w = 1.5;
+  if (v < P.t1 - w) return GREEN;
+  if (v < P.t1 + w) return mix(GREEN, YELLOW, (v - (P.t1 - w)) / (2 * w));
+  if (v < P.t2 - w) return YELLOW;
+  if (v < P.t2 + w) return mix(YELLOW, RED, (v - (P.t2 - w)) / (2 * w));
+  return RED;
+}
+
+function rgba(c, a) { return `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`; }
+
+// ---------- Zeichnen Scheibe ----------
+const disc = $("#disc");
+const dctx = disc.getContext("2d");
+const C = 500, R_DISC = 480, R_ARC = 400;
+const PITCH = (R_ARC * 1.5 * Math.PI) / (N_ARC - 1);
+const R_CHAMBER = PITCH * 0.42;
+
+const SEG_T = 30, SEG_L = 130;
+const DIGIT_W = 2 * SEG_T + SEG_L, DIGIT_H = 3 * SEG_T + 2 * SEG_L, DIGIT_GAP = 44;
+const DIGIT_Y = C - DIGIT_H / 2 - 30;
+const DIGIT_X = [C - DIGIT_GAP / 2 - DIGIT_W, C + DIGIT_GAP / 2];
+
+function segRects(x0, y0, T = SEG_T, L = SEG_L) {
+  return {
+    a: [x0 + T, y0, L, T, "h"],
+    b: [x0 + T + L, y0 + T, T, L, "v"],
+    c: [x0 + T + L, y0 + 2 * T + L, T, L, "v"],
+    d: [x0 + T, y0 + 2 * T + 2 * L, L, T, "h"],
+    e: [x0, y0 + 2 * T + L, T, L, "v"],
+    f: [x0, y0 + T, T, L, "v"],
+    g: [x0 + T, y0 + T + L, L, T, "h"],
+  };
+}
+
+function arcAngle(i) { return (135 + (i * 270) / (N_ARC - 1)) * Math.PI / 180; }
+function levelAngle(v) { return (135 + ((v - P.min) / (P.max - P.min)) * 270) * Math.PI / 180; }
+
+function resizeCanvas(cv) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// Wahrgenommene Helligkeit: PWM-Wert -> Bildschirm, damit 5 % noch sichtbar bleiben
+function perceived(k) { return Math.pow(Math.max(0, Math.min(1, k)), 0.45); }
+
+function glow(ctx, x, y, col, a, radius) {
+  const core = mix(col, WHITE, 0.45 * a);
+  const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  g.addColorStop(0, rgba(core, a));
+  g.addColorStop(0.3, rgba(col, a * 0.75));
+  g.addColorStop(1, rgba(col, 0));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawDisc(leds, digitStr, digitCol, digitK) {
+  resizeCanvas(disc);
+  const s = disc.width / 1000;
+  const ctx = dctx;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, disc.width, disc.height);
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+
+  // Schatten an der Wand
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.45)";
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetY = 12;
+  ctx.beginPath();
+  ctx.arc(C, C, R_DISC, 0, Math.PI * 2);
+  ctx.fillStyle = "#1a1c20";
+  ctx.fill();
+  ctx.restore();
+
+  // Front (opal, dunkel abgedeckt)
+  const fg = ctx.createRadialGradient(C, C - 120, 50, C, C, R_DISC);
+  fg.addColorStop(0, "#26292f");
+  fg.addColorStop(1, "#16181b");
+  ctx.fillStyle = fg;
+  ctx.beginPath();
+  ctx.arc(C, C, R_DISC, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = "#33373e";
+  ctx.stroke();
+
+  // Skalengravur
+  ctx.fillStyle = "rgba(255,255,255,0.38)";
+  ctx.strokeStyle = "rgba(255,255,255,0.28)";
+  ctx.font = "22px Baloo, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const first = Math.ceil(P.min / 5) * 5;
+  for (let v = first; v <= P.max; v += 5) {
+    const a = levelAngle(v);
+    const major = v % 10 === 0;
+    const r1 = R_ARC + 30, r2 = R_ARC + (major ? 52 : 42);
+    ctx.lineWidth = major ? 3 : 2;
+    ctx.beginPath();
+    ctx.moveTo(C + r1 * Math.cos(a), C + r1 * Math.sin(a));
+    ctx.lineTo(C + r2 * Math.cos(a), C + r2 * Math.sin(a));
+    ctx.stroke();
+    if (major) ctx.fillText(String(v), C + (R_ARC - 48) * Math.cos(a), C + (R_ARC - 48) * Math.sin(a));
+  }
+
+  // Leere Kammern
+  ctx.fillStyle = "rgba(255,255,255,0.035)";
+  for (let i = 0; i < N_ARC; i++) {
+    const a = arcAngle(i);
+    ctx.beginPath();
+    ctx.arc(C + R_ARC * Math.cos(a), C + R_ARC * Math.sin(a), R_CHAMBER, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const rects = DIGIT_X.map((x) => segRects(x, DIGIT_Y));
+  for (const r of rects) for (const k in r) {
+    const [x, y, w, h] = r[k];
+    roundRectPath(ctx, x + 4, y + 4, w - 8, h - 8, 8);
+    ctx.fill();
+  }
+
+  // Licht
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+
+  leds.forEach(([col, k], i) => {
+    const a = perceived(k);
+    if (a < 0.01) return;
+    const ang = arcAngle(i);
+    const x = C + R_ARC * Math.cos(ang), y = C + R_ARC * Math.sin(ang);
+    if (P.chambers) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, R_CHAMBER, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.fillStyle = rgba(col, a * 0.35);
+      ctx.fill();
+      glow(ctx, x, y, col, a, R_CHAMBER * 1.6 * P.spread);
+      ctx.restore();
+    } else {
+      glow(ctx, x, y, col, a * 0.8, PITCH * 0.9 * P.spread);
+    }
+  });
+
+  drawDigits(ctx, rects, digitStr, digitCol, digitK, SEG_T);
+  ctx.restore();
+
+  // Opalscheibe: leichter Schleier ueber allem
+  ctx.fillStyle = "rgba(255,255,255,0.025)";
+  ctx.beginPath();
+  ctx.arc(C, C, R_DISC - 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Beschriftung und Mikrofonoeffnung
+  ctx.fillStyle = "rgba(255,255,255,0.42)";
+  ctx.font = "34px Baloo, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("dB(A)", C, DIGIT_Y + DIGIT_H + 42);
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  for (let dx = -2; dx <= 2; dx++) for (let dy = -2; dy <= 2; dy++) {
+    if (dx * dx + dy * dy > 5) continue;
+    ctx.beginPath();
+    ctx.arc(C + dx * 11, 860 + dy * 11, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawEmptySegments(ctx, rects) {
+  ctx.fillStyle = "rgba(255,255,255,0.035)";
+  for (const r of rects) for (const k in r) {
+    const [x, y, w, h] = r[k];
+    roundRectPath(ctx, x + 4, y + 4, w - 8, h - 8, 8);
+    ctx.fill();
+  }
+}
+
+// Muss innerhalb von globalCompositeOperation = "lighter" aufgerufen werden
+function drawDigits(ctx, rects, digitStr, col, k, T) {
+  const a = perceived(k);
+  digitStr.split("").forEach((ch, di) => {
+    const r = rects[di];
+    for (const segName of DIGITS[ch] || "") {
+      const [x, y, w, h, dir] = r[segName];
+      ctx.save();
+      if (P.chambers) {
+        roundRectPath(ctx, x + 4, y + 4, w - 8, h - 8, 8);
+        ctx.clip();
+        ctx.fillStyle = rgba(col, a * 0.5);
+        ctx.fill();
+      }
+      for (let j = 0; j < 3; j++) {
+        const f = (2 * j + 1) / 6;
+        const lx = dir === "h" ? x + w * f : x + w / 2;
+        const ly = dir === "h" ? y + h / 2 : y + h * f;
+        glow(ctx, lx, ly, col, a * (P.chambers ? 0.7 : 0.6), T * 1.3 * P.spread);
+      }
+      ctx.restore();
+    }
+  });
+}
+
+// ---------- Variante B: Farbkreis + separates Display ----------
+// Masse in mm wie in laser/generate_laser.py, Darstellung mit MM px/mm
+const MM = 2.3;
+const N_RING = 60;
+const K_D = 360, K_INNER_D = 320;
+const K_R = (K_D / 2) * MM, K_RI = (K_INNER_D / 2) * MM;
+const K_C = { x: 64 + K_R, y: 500 };
+const BOX_MM = { w: 240, h: 200, r: 12 };
+const BOX = { x: K_C.x + K_R + 40 * MM, y: 500 - (BOX_MM.h * MM) / 2, w: BOX_MM.w * MM, h: BOX_MM.h * MM };
+const K_T = 16 * MM, K_L = 50 * MM;
+const K_DX = [28, 130].map((x) => BOX.x + x * MM);
+const K_DY = BOX.y + 20 * MM;
+const MIC_MM = { x: 196, y: 184 };
+
+function screwHead(ctx, x, y) {
+  ctx.fillStyle = "#2c2f34";
+  ctx.beginPath(); ctx.arc(x, y, 3 * MM, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x - 1.4 * MM, y); ctx.lineTo(x + 1.4 * MM, y); ctx.stroke();
+}
+
+function drawColorCircle(ringCol, ringK, digitStr, digitCol, digitK) {
+  resizeCanvas(disc);
+  const s = disc.width / 1600;
+  const ctx = dctx;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, disc.width, disc.height);
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+  const a = perceived(ringK);
+
+  // Halo: LEDs auf der Rueckseite beleuchten die Wand
+  if (P.halo && a > 0.01) {
+    const h = ctx.createRadialGradient(K_C.x, K_C.y, K_R * 0.9, K_C.x, K_C.y, K_R + 70 * MM * 0.5 * P.spread);
+    h.addColorStop(0, rgba(ringCol, 0.55 * a));
+    h.addColorStop(1, rgba(ringCol, 0));
+    ctx.fillStyle = h;
+    ctx.beginPath(); ctx.arc(K_C.x, K_C.y, K_R + 80 * MM, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Schatten der Gehaeuse an der Wand
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.45)";
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetY = 12;
+  ctx.fillStyle = "#1a1c20";
+  ctx.beginPath(); ctx.arc(K_C.x, K_C.y, K_R, 0, Math.PI * 2); ctx.fill();
+  roundRectPath(ctx, BOX.x, BOX.y, BOX.w, BOX.h, BOX_MM.r * MM);
+  ctx.fill();
+  ctx.restore();
+
+  // Kabelbruecke zwischen den Modulen
+  ctx.fillStyle = "#2a2d32";
+  ctx.fillRect(K_C.x + K_R - 4, 500 - 6 * MM, BOX.x - (K_C.x + K_R) + 8, 12 * MM);
+
+  // Farbkreis: Opalscheibe, dahinter Sperrholzring (Rand) und weisser Reflektor (Innenflaeche)
+  ctx.fillStyle = "#2b2d31";
+  ctx.beginPath(); ctx.arc(K_C.x, K_C.y, K_R, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#34373c";
+  ctx.beginPath(); ctx.arc(K_C.x, K_C.y, K_RI, 0, Math.PI * 2); ctx.fill();
+
+  // Displaykasten: Rauchglas-Front ("Dead Front")
+  ctx.fillStyle = "#0e0f11";
+  roundRectPath(ctx, BOX.x, BOX.y, BOX.w, BOX.h, BOX_MM.r * MM);
+  ctx.fill();
+  const rects = K_DX.map((x) => segRects(x, K_DY, K_T, K_L));
+  ctx.save();
+  ctx.globalAlpha = 0.35;  // Rauchglas verbirgt die Kammern fast vollstaendig
+  drawEmptySegments(ctx, rects);
+  ctx.restore();
+
+  // Licht
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  if (a > 0.01) {
+    // indirekt: Licht faellt von der Ringwand auf den weissen Reflektor, Rand etwas heller
+    const inner = ctx.createRadialGradient(K_C.x, K_C.y, 0, K_C.x, K_C.y, K_RI);
+    inner.addColorStop(0, rgba(ringCol, a * 0.55));
+    inner.addColorStop(0.7, rgba(ringCol, a * 0.62));
+    inner.addColorStop(0.96, rgba(ringCol, a * 0.85));
+    inner.addColorStop(1, rgba(ringCol, a * 0.5));
+    ctx.fillStyle = inner;
+    ctx.beginPath(); ctx.arc(K_C.x, K_C.y, K_RI, 0, Math.PI * 2); ctx.fill();
+    // Streulicht der Opalscheibe ueber den Holzrand
+    const rim = ctx.createRadialGradient(K_C.x, K_C.y, K_RI, K_C.x, K_C.y, K_R);
+    rim.addColorStop(0, rgba(ringCol, a * 0.35 * P.spread));
+    rim.addColorStop(1, rgba(ringCol, 0));
+    ctx.fillStyle = rim;
+    ctx.beginPath(); ctx.arc(K_C.x, K_C.y, K_R, 0, Math.PI * 2); ctx.fill();
+  }
+  drawDigits(ctx, rects, digitStr, digitCol, digitK, K_T);
+  ctx.restore();
+
+  // Oberflaechen: Opal-Schleier und Glanz auf dem Rauchglas
+  ctx.fillStyle = "rgba(255,255,255,0.03)";
+  ctx.beginPath(); ctx.arc(K_C.x, K_C.y, K_R, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.stroke();
+  const gloss = ctx.createLinearGradient(BOX.x, BOX.y, BOX.x + BOX.w * 0.6, BOX.y + BOX.h);
+  gloss.addColorStop(0, "rgba(255,255,255,0.07)");
+  gloss.addColorStop(0.45, "rgba(255,255,255,0.0)");
+  ctx.fillStyle = gloss;
+  roundRectPath(ctx, BOX.x, BOX.y, BOX.w, BOX.h, BOX_MM.r * MM);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.stroke();
+
+  // Verschraubung: 6x M3 am Kreis, 4x M3 am Kasten
+  for (let k = 0; k < 6; k++) {
+    const ang = ((30 + 60 * k) * Math.PI) / 180, r = 170 * MM;
+    screwHead(ctx, K_C.x + r * Math.cos(ang), K_C.y + r * Math.sin(ang));
+  }
+  for (const [x, y] of [[10, 10], [230, 10], [10, 190], [230, 190]]) screwHead(ctx, BOX.x + x * MM, BOX.y + y * MM);
+
+  // Gravur und Mikrofongitter
+  ctx.fillStyle = "rgba(255,255,255,0.4)";
+  ctx.font = `${10 * MM}px Baloo, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText("dB(A)", BOX.x + 110 * MM, BOX.y + 182 * MM);
+  ctx.fillStyle = "rgba(0,0,0,0.85)";
+  const mx = BOX.x + MIC_MM.x * MM, my = BOX.y + MIC_MM.y * MM;
+  ctx.beginPath(); ctx.arc(mx, my, 1 * MM, 0, Math.PI * 2); ctx.fill();
+  for (let k = 0; k < 6; k++) {
+    const ang = (k * Math.PI) / 3;
+    ctx.beginPath(); ctx.arc(mx + 4 * MM * Math.cos(ang), my + 4 * MM * Math.sin(ang), 1 * MM, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+// ---------- Zeichnen Verlauf ----------
+const hist = $("#history");
+const hctx = hist.getContext("2d");
+
+function drawHistory() {
+  resizeCanvas(hist);
+  const dpr = window.devicePixelRatio || 1;
+  const W = hist.width / dpr, H = hist.height / dpr;
+  const ctx = hctx;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const lo = P.min - 5, hi = P.max + 5;
+  const y = (v) => H - ((Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo)) * H;
+
+  ctx.fillStyle = rgba(GREEN, 0.06); ctx.fillRect(0, y(P.t1), W, H - y(P.t1));
+  ctx.fillStyle = rgba(YELLOW, 0.07); ctx.fillRect(0, y(P.t2), W, y(P.t1) - y(P.t2));
+  ctx.fillStyle = rgba(RED, 0.07); ctx.fillRect(0, 0, W, y(P.t2));
+
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1;
+  ctx.font = "12px UniStuttgart, Arial, sans-serif";
+  for (const [t, c] of [[P.t1, YELLOW], [P.t2, RED]]) {
+    ctx.strokeStyle = rgba(c, 0.6);
+    ctx.beginPath(); ctx.moveTo(0, y(t)); ctx.lineTo(W, y(t)); ctx.stroke();
+    ctx.fillStyle = rgba(c, 0.85);
+    ctx.fillText(`${t} dB`, 4, y(t) - 4);
+  }
+  ctx.setLineDash([]);
+
+  const n = 600, dx = W / (n - 1), off = n - history.length;
+  ctx.lineWidth = 2;
+  for (let i = 1; i < history.length; i++) {
+    ctx.strokeStyle = rgba(ZONE_COLORS[history[i].z], 0.95);
+    ctx.beginPath();
+    ctx.moveTo((off + i - 1) * dx, y(history[i - 1].v));
+    ctx.lineTo((off + i) * dx, y(history[i].v));
+    ctx.stroke();
+  }
+}
+
+// ---------- Hauptschleife ----------
+function frame() {
+  const step = (N_ARC > 1) ? (P.max - P.min) / (N_ARC - 1) : 1;
+  const bright = P.bright / 100;
+  const pulse = redT >= P.redDelay;
+  const litCount = arcLevel < P.min - step / 2 ? 0 : Math.min(N_ARC, Math.round((arcLevel - P.min) / step) + 1);
+  const peakIdx = Math.round((peak - P.min) / step);
+
+  const leds = [];
+  for (let i = 0; i < N_ARC; i++) {
+    const v = P.min + i * step;
+    let col = colorForLevel(v), k;
+    if (pulse) {
+      col = RED;
+      k = bright * (0.25 + 0.75 * (0.5 + 0.5 * Math.sin(2 * Math.PI * 1.2 * tNow)));
+    } else {
+      k = i < litCount ? bright : P.bg / 100;
+      if (P.peakHold > 0 && i === peakIdx && i >= litCount) { col = mix(col, WHITE, 0.4); k = bright; }
+    }
+    leds.push([col, k]);
+  }
+
+  let digitStr;
+  if (digitVal === null || digitVal < 0) digitStr = "--";
+  else if (digitVal > 99) digitStr = "HI";
+  else digitStr = String(digitVal).padStart(2, " ");
+  const digitCol = ZONE_COLORS[zone];
+
+  // Strom: jeder Kanal 20 mA bei voller Ansteuerung
+  let mA = 0;
+  if (variant === "tacho") {
+    drawDisc(leds, digitStr, digitCol, bright);
+    for (const [c, k] of leds) mA += ((c[0] + c[1] + c[2]) / 255) * LED_MA * k;
+  } else {
+    const ringCol = pulse ? RED : colorForLevel(arcLevel);
+    const ringK = pulse ? leds[0][1] : bright;
+    drawColorCircle(ringCol, ringK, digitStr, digitCol, bright);
+    mA += N_RING * ((ringCol[0] + ringCol[1] + ringCol[2]) / 255) * LED_MA * ringK;
+  }
+  drawHistory();
+  let segOn = 0;
+  for (const ch of digitStr) segOn += (DIGITS[ch] || "").length;
+  mA += segOn * 3 * ((digitCol[0] + digitCol[1] + digitCol[2]) / 255) * LED_MA * bright;
+  return mA;
+}
+
+let last = performance.now();
+function loop(now) {
+  // rAF-Zeitstempel kann vor dem performance.now() beim Laden liegen -> dt nie negativ
+  const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
+  last = now;
+  update(dt);
+  const mA = frame();
+
+  roT += dt;
+  if (roT >= 0.2) {
+    roT = 0;
+    $("#roInst").textContent = `${inst.toFixed(1)} dB`;
+    $("#roFast").textContent = `${leqFast.toFixed(1)} dB`;
+    $("#roSlow").textContent = `${leqSlow.toFixed(1)} dB`;
+    $("#roPeak").textContent = `${peak.toFixed(1)} dB`;
+    $("#roZone").textContent = ZONE_NAMES[zone];
+    $("#roZone").style.color = rgba(ZONE_COLORS[zone], 1);
+    $("#roRed").textContent = zone === 2 ? `${redT.toFixed(0)} s` : "-";
+    $("#roAmp").textContent = `${(mA / 1000).toFixed(2)} A`;
+    const tot = (mA + PI_MA) / 1000;
+    const el = $("#roAmpTot");
+    el.textContent = `${tot.toFixed(2)} A`;
+    el.classList.toggle("warn", tot > 3.5);
+  }
+  requestAnimationFrame(loop);
+}
+
+// ---------- Events ----------
+function bindSeg(id, attr, cb) {
+  $(id).addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    for (const x of $(id).querySelectorAll("button")) x.classList.toggle("on", x === b);
+    cb(b.dataset[attr]);
+  });
+}
+
+bindSeg("#srcSeg", "src", (v) => {
+  src = v;
+  for (const p of document.querySelectorAll(".srcpane")) p.classList.toggle("on", p.dataset.pane === v);
+});
+bindSeg("#modeSeg", "mode", (v) => { simMode = v; autoTimer = 0; });
+
+let variant = "tacho";
+const VAR_INFO = {
+  tacho: "Runde Scheibe, 45-LED-Bogen als Pegelanzeige, Ziffern in der Mitte. 87 LEDs.",
+  kreis: "Farbkreis Ø 360 mm, 60 LEDs indirekt hinter Opal; Displaykasten 240 x 200 mm mit " +
+    "Rauchglasfront, 2 Ziffern (42 LEDs). Maße wie die Lasercut-Vorlagen in laser/.",
+};
+function setVariant(v) {
+  variant = v;
+  disc.style.aspectRatio = v === "tacho" ? "1" : "1.6";
+  disc.style.maxWidth = v === "tacho" ? "620px" : "960px";
+  $("#varInfo").textContent = VAR_INFO[v];
+}
+bindSeg("#varSeg", "var", setVariant);
+setVariant("tacho");
+$("#btnDoor").addEventListener("click", () => { spike = 95; });
+$("#btnMic").addEventListener("click", startMic);
+$("#manual").addEventListener("input", (e) => { $("#manualOut").textContent = `${e.target.value} dB`; });
+$("#micOffset").addEventListener("input", (e) => { $("#micOffsetOut").textContent = `${e.target.value} dB`; });
+$("#darkRoom").addEventListener("change", (e) => $("#wall").classList.toggle("dark", e.target.checked));
+
+buildControls();
+syncControls();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

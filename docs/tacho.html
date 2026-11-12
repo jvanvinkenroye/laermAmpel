@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lärmampel - Visualisierung - Lärmampel</title>
+<meta name="description" content="Lärmampel - ein Makerspace-Projekt">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/logos/spacie-green.svg">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <a href="index.html" class="name">Lärmampel</a>
+    <span class="sub">Makerspace-Projekt</span>
+  </div>
+  <div class="logos">
+    <img src="assets/logos/Makerspace.svg" alt="Makerspace Uni Stuttgart">
+    <img class="tik" src="assets/logos/tik-logo.svg" alt="TIK">
+  </div>
+</header>
+<nav class="main"><a href="index.html">Start</a><a href="simulator/index.html">Simulator</a><a href="teileliste.html">Teileliste</a><a href="schaltung.html">Schaltung</a><a href="gehaeuse.html">Gehäuse & Bau</a><a href="tacho.html" class="on">Tacho-Variante</a></nav>
+<div class="titleline"></div>
+<main>
+<div class="doclayout"><aside class="toc"><h2>Inhalt</h2><ul><li><a href="#frontansicht-durchmesser-ca-38-cm">Frontansicht (Durchmesser ca. 38 cm)</a></li><li><a href="#verhalten">Verhalten</a></li><li><a href="#zeitkonstanten">Zeitkonstanten</a></li><li><a href="#led-kette-eine-datenleitung">LED-Kette (eine Datenleitung)</a></li><li><a href="#gehaeuseaufbau-schichten-von-hinten-nach-vorn">Gehäuseaufbau (Schichten von hinten nach vorn)</a></li></ul></aside><article class="doc"><h1>Lärmampel - Visualisierung</h1><p class="srcnote">Quelle: <code>VISUALISIERUNG.md</code></p><p>Runde Wandscheibe mit LED-Bogen (Tacho-Prinzip) und großer dB-Anzeige in der Mitte.</p>
+<h2 id="frontansicht-durchmesser-ca-38-cm">Frontansicht (Durchmesser ca. 38 cm)</h2>
+<pre><code>                    .  o  o  o  o  o  .
+               o                          o
+           o                                  o
+        o          gelb        |      rot         o
+      o                                             o
+     o                                               o
+    o        +-------+  +-------+                     o
+    o        |       |  |       |                     o
+    o        |   6   |  |   8   |    dB(A)            o
+    o        |       |  |       |                     o
+     o       +-------+  +-------+                    o
+      o   grün                                     o
+        o                                         o
+           o                                   o
+              (Start)        [Mikro]       (Ende)
+              40 dB           o o o        85 dB</code></pre>
+<ul><li><strong>Äußerer Bogen</strong>: 45 LEDs über 270 Grad, von 7:30 Uhr im Uhrzeigersinn bis 4:30 Uhr. Unten bleibt eine Lücke von 90 Grad für die Mikrofonöffnung.</li><li><strong>Skala</strong>: Standard 40-85 dB(A), also genau 1 dB pro LED. Bereich ist konfigurierbar.</li><li><strong>Mitte</strong>: zwei große 7-Segment-Ziffern aus WS2812B (je ca. 120 mm hoch), "dB(A)" als Gravur/Aufdruck auf der Streuscheibe.</li></ul>
+<h2 id="verhalten">Verhalten</h2>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">Element</th><th style="text-align:left">Darstellung</th></tr></thead><tbody><tr><td style="text-align:left">Bogen, Hintergrund</td><td style="text-align:left">alle 45 LEDs leuchten schwach (ca. 3-5 %) in ihrer Zonenfarbe - die Skala ist immer sichtbar</td></tr><tr><td style="text-align:left">Bogen, Pegel</td><td style="text-align:left">LEDs vom Start bis zum aktuellen Pegel leuchten voll, jeweils in der Farbe ihrer Zone</td></tr><tr><td style="text-align:left">Zonenfarbe</td><td style="text-align:left">grün bis Schwelle 1, gelb bis Schwelle 2, rot darüber; Übergang optional als Farbverlauf</td></tr><tr><td style="text-align:left">Spitzenwert</td><td style="text-align:left">eine LED (weiß oder heller) markiert den Peak, hält 3 s und fällt dann langsam zurück</td></tr><tr><td style="text-align:left">Ziffern</td><td style="text-align:left">gleitender Leq über ca. 1-2 s, Aktualisierung 2x pro Sekunde, Farbe = aktuelle Zone</td></tr><tr><td style="text-align:left">Dauer-Rot</td><td style="text-align:left">liegt der Pegel länger als N Sekunden im roten Bereich, pulsiert der ganze Bogen rot</td></tr><tr><td style="text-align:left">Außerhalb Zeitplan</td><td style="text-align:left">Anzeige aus oder nur Uhrzeit in den Ziffern (gedimmt)</td></tr></tbody></table></div>
+<p>Die Schwellen 1 und 2 verschieben die Farbgrenzen auf dem Bogen. Standard: grün &lt; 60 dB(A), gelb 60-70 dB(A), rot &gt; 70 dB(A).</p>
+<h2 id="zeitkonstanten">Zeitkonstanten</h2>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">Größe</th><th style="text-align:left">Wert</th><th style="text-align:left">Zweck</th></tr></thead><tbody><tr><td style="text-align:left">Bogen</td><td style="text-align:left">Leq über 250 ms, Abfall max. 10 dB/s</td><td style="text-align:left">lebendig, aber ohne Flackern</td></tr><tr><td style="text-align:left">Ziffern</td><td style="text-align:left">Leq über 1-2 s</td><td style="text-align:left">ruhig ablesbar</td></tr><tr><td style="text-align:left">Zonenwechsel</td><td style="text-align:left">Hysterese 2 dB, Haltezeit 2 s</td><td style="text-align:left">kein Hin- und Herspringen</td></tr><tr><td style="text-align:left">Logging</td><td style="text-align:left">Leq, Lmax, L90 pro Minute</td><td style="text-align:left">Datensicherung</td></tr></tbody></table></div>
+<h2 id="led-kette-eine-datenleitung">LED-Kette (eine Datenleitung)</h2>
+<pre><code>Pi GPIO10 -&gt; 74AHCT125 -&gt; 330R -&gt; [Bogen LED 0..44] -&gt; [Ziffer Zehner 45..65] -&gt; [Ziffer Einer 66..86]</code></pre>
+<p>Ziffer: 7 Segmente x 3 LEDs = 21 LEDs, Segmentreihenfolge a, b, c, d, e, f, g:</p>
+<pre><code>      aaa
+     f   b
+     f   b
+     f   b
+      ggg
+     e   c
+     e   c
+     e   c
+      ddd</code></pre>
+<p>Gesamt: 45 + 2 x 21 = 87 LEDs.</p>
+<h2 id="gehaeuseaufbau-schichten-von-hinten-nach-vorn">Gehäuseaufbau (Schichten von hinten nach vorn)</h2>
+<ol><li>Rückwand 6 mm Pappelsperrholz, Schlüssellochaufhängung, Pi + Platine</li><li>Trägerplatte 4 mm mit Nut / Steg für den LED-Bogen und den Ziffernsegmenten</li><li>Lichtkammern 20-25 mm (gestapelte Lasercut-Lagen oder 3D-Druck, innen weiß):</li></ol>
+<ul><li>ringförmiger Kanal für den Bogen, einzelne Kammern pro LED für scharfe Punkte oder durchgehender Kanal für ein weiches Band</li><li>eine Kammer pro Segment, damit Segmente nicht ineinander überstrahlen</li></ul>
+<ol><li>Front: opales Acryl 3 mm, rund, mit Gravur der Skala (40/50/60/70/80) und "dB(A)"</li><li>Optional Blende aus schwarz eingefärbtem Acryl/Folie außerhalb der leuchtenden Flächen für hohen Kontrast</li></ol>
+<p>Ziffernhöhe 120 mm ist aus ca. 12-15 m gut ablesbar (Faustregel: 1 cm Zeichenhöhe pro 1 m Leseabstand ist komfortabel, Minimum ca. 0,5 cm/m).</p></article></div>
+</main>
+<footer>
+  Makerspace Uni Stuttgart · Lärmampel · Konzept und Simulation, keine geeichte Messung
+</footer>
+</body>
+</html>

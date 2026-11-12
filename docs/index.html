@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lärmampel - Makerspace-Projekt</title>
+<meta name="description" content="Selbstgebaute Lärmampel mit Raspberry Pi, MEMS-Mikrofon und WS2812B: Simulator, Teileliste, Schaltung, Lasercut-Vorlagen und Renderings.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/logos/spacie-green.svg">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <a href="index.html" class="name">Lärmampel</a>
+    <span class="sub">Makerspace-Projekt</span>
+  </div>
+  <div class="logos">
+    <img src="assets/logos/Makerspace.svg" alt="Makerspace Uni Stuttgart">
+    <img class="tik" src="assets/logos/tik-logo.svg" alt="TIK">
+  </div>
+</header>
+<nav class="main"><a href="index.html" class="on">Start</a><a href="simulator/index.html">Simulator</a><a href="teileliste.html">Teileliste</a><a href="schaltung.html">Schaltung</a><a href="gehaeuse.html">Gehäuse & Bau</a><a href="tacho.html">Tacho-Variante</a></nav>
+<div class="titleline"></div>
+<main>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Lärmampel</h1>
+    <p class="lead">Eine Lärmampel für Klassenräume und Lernorte, selbst gebaut im
+    Makerspace: Sie misst den Schallpegel, zeigt ihn als Farbe und in dB(A) und
+    protokolliert die Werte im Netz.</p>
+    <div class="cta">
+      <a class="btn primary" href="simulator/index.html">Simulator öffnen</a>
+      <a class="btn" href="gehaeuse.html">Bauanleitung</a>
+    </div>
+    <div class="warn"><b>Projektstatus:</b> Konzept, Simulation und Konstruktion.
+    Die Hardware ist noch nicht gebaut; Maße, Schaltung und Firmware sind ungetestet.</div>
+  </div>
+  <img class="hero-img" src="img/laermampel_gruen.png" alt="Rendering der Lärmampel: Farbkreis und Display an der Wand">
+</section>
+
+<section>
+  <h2>So sieht sie aus</h2>
+  <p>Rendering der Bauform „Farbkreis + Display“ in den drei Ampelstufen. Maße wie in
+  den Lasercut-Vorlagen: Farbkreis Ø 360 mm, Displaykasten 240 × 200 mm.</p>
+  <div class="gallery"><figure><a href="img/laermampel_gruen.png"><img src="img/laermampel_gruen.png" alt="Lärmampel in Grün" loading="lazy"></a><figcaption><b>Grün</b> unter 60 dB(A)</figcaption></figure><figure><a href="img/laermampel_gelb.png"><img src="img/laermampel_gelb.png" alt="Lärmampel in Gelb" loading="lazy"></a><figcaption><b>Gelb</b> 60 bis 70 dB(A)</figcaption></figure><figure><a href="img/laermampel_rot.png"><img src="img/laermampel_rot.png" alt="Lärmampel in Rot" loading="lazy"></a><figcaption><b>Rot</b> über 70 dB(A)</figcaption></figure></div>
+</section>
+
+<section>
+  <h2>Zwei Bauformen</h2>
+  <div class="cards">
+    <a class="card" href="gehaeuse.html">
+      <h3>Farbkreis + Display</h3>
+      <p>Eine runde Leuchtfläche in der Ampelfarbe, indirekt beleuchtet von 60 LEDs,
+      daneben ein Displaykasten mit zwei 7-Segment-Ziffern hinter Rauchglas.
+      102 LEDs, Gehäuse aus gelasertem Pappelsperrholz.</p>
+      <span class="more">Gehäuse und Bau</span>
+    </a>
+    <a class="card" href="tacho.html">
+      <h3>Tacho-Scheibe</h3>
+      <p>Eine runde Scheibe mit 45-LED-Bogen über 270 Grad, der mit dem Pegel von
+      Grün über Gelb nach Rot wandert, und großen Ziffern in der Mitte. 87 LEDs.</p>
+      <span class="more">Visualisierung</span>
+    </a>
+  </div>
+</section>
+
+<section>
+  <h2>Technik</h2>
+  <div class="facts">
+    <div class="box"><h3>Messen</h3><p>MEMS-Mikrofon INMP441 über I2S. Nutzbar
+    ca. 40-115 dB(A), nach Kalibrierung etwa ±1-2 dB - genug für eine Ampel, aber
+    keine geeichte Messung.</p></div>
+    <div class="box"><h3>Anzeigen</h3><p>WS2812B-LEDs an einer Datenleitung,
+    Farbe mit Hysterese und Haltezeit, Spitzenwert, Warnung bei Dauer-Rot.</p></div>
+    <div class="box"><h3>Speichern</h3><p>Raspberry Pi Zero 2 W: Leq, Lmax und L90
+    pro Minute in SQLite, nächtliche Sicherung auf NAS oder Server, Weboberfläche.</p></div>
+    <div class="box magenta"><h3>Datenschutz</h3><p>Es werden nur Pegelwerte
+    berechnet und gespeichert, niemals Audio.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Ausprobieren im Simulator</h2>
+  <div class="sim">
+    <p>Der Simulator im Browser zeigt beide Bauformen mit derselben Logik, die die
+    Firmware bekommen soll. Klassenraum simulieren, Schieberegler oder das eigene
+    Mikrofon, Schwellen und Zeitkonstanten einstellen, LED-Strom ablesen.</p>
+    <a class="btn primary" href="simulator/index.html">Simulator öffnen</a>
+  </div>
+</section>
+
+<section>
+  <h2>In fünf Schritten zur Lärmampel</h2>
+  <ol class="steps"><li><span class="nr">1</span><div><a href="teileliste.html"><b>Teile besorgen</b></a><p>Pi Zero 2 W, Mikrofon INMP441, WS2812B-Streifen, Netzteil, Sperrholz und Acryl.</p></div></li><li><span class="nr">2</span><div><a href="gehaeuse.html"><b>Gehäuse lasern</b></a><p>15 Vorlagen für Farbkreis und Displaykasten, parametrisch erzeugt.</p></div></li><li><span class="nr">3</span><div><a href="schaltung.html"><b>Elektronik verdrahten</b></a><p>Eine Datenleitung für alle 102 LEDs, Pegelwandler, Absicherung.</p></div></li><li><span class="nr">4</span><div><a href="schaltung.html#mikrofon-und-messgenauigkeit-inmp441-datenblatt"><b>Kalibrieren</b></a><p>Einmal gegen einen Schallpegelmesser abgleichen, Offset eintragen.</p></div></li><li><span class="nr">5</span><div><a href="gehaeuse.html"><b>Aufhängen</b></a><p>Zwei Schlüssellöcher, ein Netzteil, Daten per WLAN.</p></div></li></ol>
+</section>
+
+<section>
+  <h2>Lasercut-Vorlagen</h2>
+  <p>Rot = schneiden, Blau = ritzen, Schwarz = gravieren. Erzeugt von
+  <code>laser/generate_laser.py</code>, alle Maße zentral änderbar.</p>
+  <div class="gallery laser-gallery"><figure class="laser"><a href="laser/K2_kreis_ring_kerbe_6mm.svg"><img src="laser/preview/K2_kreis_ring_kerbe_6mm.svg" alt="Ringlage mit Kabelkerbe" loading="lazy"></a><figcaption>Ringlage mit Kabelkerbe</figcaption></figure><figure class="laser"><a href="laser/D6_display_led_traeger_4mm.svg"><img src="laser/preview/D6_display_led_traeger_4mm.svg" alt="LED-Träger mit Segmentfeldern" loading="lazy"></a><figcaption>LED-Träger mit Segmentfeldern</figcaption></figure><figure class="laser"><a href="laser/D7_display_kammern_6mm.svg"><img src="laser/preview/D7_display_kammern_6mm.svg" alt="Lichtkammern" loading="lazy"></a><figcaption>Lichtkammern</figcaption></figure><figure class="laser"><a href="laser/G1_gemeinsame_rueckwand_6mm.svg"><img src="laser/preview/G1_gemeinsame_rueckwand_6mm.svg" alt="Gemeinsame Rückwand" loading="lazy"></a><figcaption>Gemeinsame Rückwand</figcaption></figure></div>
+</section>
+
+<section>
+  <h2>Downloads</h2>
+  <ul class="downloads"><li><a href="downloads/laermampel-laser.zip">Lasercut-Vorlagen (ZIP)</a> <span>15 SVGs + Generator-Skript</span></li><li><a href="downloads/laermampel.blend">Blender-Szene (.blend)</a> <span>Farbkreis + Display, Blender 5</span></li><li><a href="downloads/render_laermampel.py">Render-Skript</a> <span>erzeugt die Szene aus den Maßen</span></li><li><a href="downloads/TEILELISTE.md">Dokumente als Markdown</a> <span>Teileliste, Schaltung, Gehäuse, Tacho-Variante</span></li></ul>
+</section>
+
+</main>
+<footer>
+  Makerspace Uni Stuttgart · Lärmampel · Konzept und Simulation, keine geeichte Messung
+</footer>
+</body>
+</html>

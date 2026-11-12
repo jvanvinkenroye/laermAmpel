@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="244mm" height="204mm" viewBox="0 0 244 204">
+<g transform="translate(2 2)">
+  <rect x="0" y="0" width="240" height="200" rx="12" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <circle cx="10" cy="10" r="1.7" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <circle cx="230" cy="10" r="1.7" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <circle cx="10" cy="190" r="1.7" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <circle cx="230" cy="190" r="1.7" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="45.5" y="21.5" width="47" height="13" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="95.5" y="37.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="95.5" y="103.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="45.5" y="153.5" width="47" height="13" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="29.5" y="103.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="29.5" y="37.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="45.5" y="87.5" width="47" height="13" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="147.5" y="21.5" width="47" height="13" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="197.5" y="37.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="197.5" y="103.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="147.5" y="153.5" width="47" height="13" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="131.5" y="103.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="131.5" y="37.5" width="13" height="47" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="147.5" y="87.5" width="47" height="13" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+  <rect x="188" y="176" width="16" height="16" rx="2" fill="none" stroke="#ff0000" stroke-width="1.6"/>
+</g>
+</svg>

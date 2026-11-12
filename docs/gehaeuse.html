@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lärmampel Variante B - Farbkreis + Display - Lärmampel</title>
+<meta name="description" content="Lärmampel - ein Makerspace-Projekt">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/logos/spacie-green.svg">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <a href="index.html" class="name">Lärmampel</a>
+    <span class="sub">Makerspace-Projekt</span>
+  </div>
+  <div class="logos">
+    <img src="assets/logos/Makerspace.svg" alt="Makerspace Uni Stuttgart">
+    <img class="tik" src="assets/logos/tik-logo.svg" alt="TIK">
+  </div>
+</header>
+<nav class="main"><a href="index.html">Start</a><a href="simulator/index.html">Simulator</a><a href="teileliste.html">Teileliste</a><a href="schaltung.html">Schaltung</a><a href="gehaeuse.html" class="on">Gehäuse & Bau</a><a href="tacho.html">Tacho-Variante</a></nav>
+<div class="titleline"></div>
+<main>
+<div class="doclayout"><aside class="toc"><h2>Inhalt</h2><ul><li><a href="#ansicht-und-masse">Ansicht und Maße</a></li><li><a href="#schichtaufbau">Schichtaufbau</a></li><li><a href="#den-led-ring-bauen">Den LED-Ring bauen</a></li><li><a href="#displaykasten-bauen-kurzfassung">Displaykasten bauen (Kurzfassung)</a></li><li><a href="#laserhinweise">Laserhinweise</a></li></ul></aside><article class="doc"><h1>Lärmampel Variante B - Farbkreis + Display</h1><p class="srcnote">Quelle: <code>GEHAEUSE_FARBKREIS.md</code></p><p>Farbkreis (Ø 360 mm, leuchtet flächig in der Ampelfarbe) und daneben ein Displaykasten (240 x 200 mm) mit zwei 7-Segment-Ziffern und der gesamten Elektronik. Lasercut-Vorlagen: <code>laser/svg/</code>, erzeugt von <code>laser/generate_laser.py</code>. Vorschau im Simulator: <code>simulator/index.html</code>, Variante "Farbkreis + Display".</p>
+<h2 id="ansicht-und-masse">Ansicht und Maße</h2>
+<pre><code> ┌──────────────────────────────────────────────────────────────┐  G1 gemeinsame Rückwand
+ │       .-&#x27;&#x27;&#x27;&#x27;&#x27;&#x27;-.                                             │  (optional, ersetzt K1 + D1)
+ │    .&#x27;            &#x27;.          ┌──────────────────────┐        │
+ │   /                \         │   ┌──┐    ┌──┐       │        │
+ │  |    Farbkreis     |========│   │  │    │  │       │        │  ==== Kabelbrücke
+ │  |    Ø 360         |        │   └──┘    └──┘       │        │
+ │   \                /         │       dB(A)    (o)   │        │  (o) Mikrofon
+ │    &#x27;.            .&#x27;          └──────────────────────┘        │
+ │       &#x27;-......-&#x27;                                             │
+ └──────────────────────────────────────────────────────────────┘
+   |&lt;---- 360 ----&gt;|&lt;-- 40 --&gt;|&lt;-------- 240 --------&gt;|        Tiefe beider Module ca. 63 mm</code></pre>
+<h2 id="schichtaufbau">Schichtaufbau</h2>
+<h3 id="farbkreis-von-der-wand-nach-vorn">Farbkreis (von der Wand nach vorn)</h3>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">Lage</th><th style="text-align:left">Datei</th><th style="text-align:left">Material</th><th style="text-align:right">Anzahl</th><th style="text-align:left">Funktion</th></tr></thead><tbody><tr><td style="text-align:left">K1</td><td style="text-align:left"><code>K1_kreis_rueckwand_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">Rückwand, Innenseite weiß = Reflektor, Schlüssellöcher</td></tr><tr><td style="text-align:left">K2</td><td style="text-align:left"><code>K2_kreis_ring_kerbe_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">Ringlage mit Kerbe für das Kabel (rechts, Richtung Display)</td></tr><tr><td style="text-align:left">K3</td><td style="text-align:left"><code>K3_kreis_ring_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">7</td><td style="text-align:left">Ringlagen</td></tr><tr><td style="text-align:left">K4</td><td style="text-align:left"><code>K4_kreis_ring_oben_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">oberste Ringlage mit 6 Vorbohrungen</td></tr><tr><td style="text-align:left">K5</td><td style="text-align:left"><code>K5_kreis_front_opal_3mm.svg</code></td><td style="text-align:left">Acryl opal 3 mm</td><td style="text-align:right">1</td><td style="text-align:left">Streuscheibe</td></tr></tbody></table></div>
+<p>Ring: außen Ø 360, innen Ø 320 (20 mm Wand), 9 Lagen = 54 mm Lichtraum. Die Front wird mit 6 Holzschrauben 3 x 16 (schwarz, Linsenkopf) befestigt.</p>
+<h3 id="displaykasten-von-der-wand-nach-vorn">Displaykasten (von der Wand nach vorn)</h3>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">Lage</th><th style="text-align:left">Datei</th><th style="text-align:left">Material</th><th style="text-align:right">Anzahl</th><th style="text-align:left">Funktion</th></tr></thead><tbody><tr><td style="text-align:left">D1</td><td style="text-align:left"><code>D1_display_rueckwand_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">Rückwand, Pi-Befestigung, Lüftung, Schlüssellöcher</td></tr><tr><td style="text-align:left">D2</td><td style="text-align:left"><code>D2_display_rahmen_kabel_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">Rahmen mit Kerben: links Kabel zum Kreis, unten Netzteil</td></tr><tr><td style="text-align:left">D3</td><td style="text-align:left"><code>D3_display_rahmen_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">Rahmen</td></tr><tr><td style="text-align:left">D4</td><td style="text-align:left"><code>D4_display_rahmen_einschraub_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">Rahmen mit Bohrungen für Einschraubmuttern</td></tr><tr><td style="text-align:left">D5</td><td style="text-align:left"><code>D5_display_rahmen_einschraub_luft_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">1</td><td style="text-align:left">wie D4, plus Lüftungskerbe oben</td></tr><tr><td style="text-align:left">D6</td><td style="text-align:left"><code>D6_display_led_traeger_4mm.svg</code></td><td style="text-align:left">Pappel 4 mm</td><td style="text-align:right">1</td><td style="text-align:left">LED-Träger, Segmentpositionen graviert (1a ... 2g)</td></tr><tr><td style="text-align:left">D7</td><td style="text-align:left"><code>D7_display_kammern_6mm.svg</code></td><td style="text-align:left">Pappel 6 mm</td><td style="text-align:right">4</td><td style="text-align:left">Lichtkammern (24 mm), Mikrofonschacht</td></tr><tr><td style="text-align:left">D8</td><td style="text-align:left"><code>D8_display_front_opal_2mm.svg</code></td><td style="text-align:left">Acryl opal 2 mm</td><td style="text-align:right">1</td><td style="text-align:left">Streuscheibe</td></tr><tr><td style="text-align:left">D9</td><td style="text-align:left"><code>D9_display_front_rauchgrau_3mm.svg</code></td><td style="text-align:left">Acryl rauchgrau 3 mm</td><td style="text-align:right">1</td><td style="text-align:left">Front ("Dead Front"), Gravur dB(A)</td></tr></tbody></table></div>
+<ul><li>D1-D5 werden zur "Wanne" verleimt, D6 + 4x D7 zum "Frontmodul".</li><li>Frontmodul, D8 und D9 hängen mit 4x M3 x 40 an Einschraubmuttern in D4/D5. Zum Öffnen nur diese 4 Schrauben lösen; die Elektronik liegt dann frei.</li><li>Die Einschraubmuttern (M3 für Holz) brauchen je nach Hersteller 4-5 mm Bohrung - vorher prüfen und ggf. <code>INSERT_D</code> im Generator anpassen.</li></ul>
+<h2 id="den-led-ring-bauen">Den LED-Ring bauen</h2>
+<h3 id="material">Material</h3>
+<ul><li>1 m WS2812B-Streifen, 60 LEDs/m, <strong>IP30</strong> (ohne Silikonmantel), 10 mm breit, selbstklebend (3M-Klebeband auf der Rückseite). 60 LEDs x 16,7 mm = 1000 mm, der Innenumfang bei Ø 320 mm ist 1005 mm - der Streifen passt genau einmal herum, es bleiben ca. 5 mm Luft an der Kerbe.</li><li>Litze 0,5 mm2 rot/schwarz, 0,14 mm2 für Daten, JST-SM-Stecker 3-polig.</li></ul>
+<h3 id="schritte">Schritte</h3>
+<ol><li><strong>Ringlagen schneiden und verleimen.</strong> Reihenfolge: K1 - K2 - 7x K3 - K4. Die beim Schneiden anfallenden Innenscheiben (Ø 320) eignen sich als Zentrierkern: Kern einlegen, Lagen darüberschieben, ausrichten, mit Holzleim verleimen und spannen. Kerbe in K2 zeigt nach rechts (zum Display), Vorbohrungen in K4 liegen oben.</li><li><strong>Innen schleifen und weiß lackieren.</strong> Innenwand und Innenseite der Rückwand matt weiß (z. B. Acryllack seidenmatt). Das ist der Reflektor - weiß statt Holzton bringt deutlich mehr und neutraleres Licht.</li><li><strong>Streifen vorher testen.</strong> Mit dem Pi oder einem Mikrocontroller alle 60 LEDs einmal rot, grün, blau durchschalten. Ein defekter Pixel unterbricht sonst alles danach.</li><li><strong>Anschlüsse löten.</strong> Am Anfang (DIN-Seite, Pfeilrichtung beachten): 5V, GND, DIN. Am Ende zusätzlich 5V und GND (Einspeisung an beiden Enden, verhindert Spannungsabfall und Farbverschiebung). DOUT am Ende bleibt frei.</li><li><strong>Streifen einkleben.</strong> Start direkt neben der Kerbe, LEDs zeigen zur Kreismitte, Streifen auf halber Tiefe der Ringwand (ca. 25-30 mm von der Rückwand). Im Uhrzeigersinn rundherum andrücken. Der Streifen wird nur über die flache Seite gebogen - das geht problemlos. Wo der Kleber nicht hält: einzelne Tropfen Heißkleber oder kleine Kabelbinder-Sockel.</li><li><strong>Kabel durch die Kerbe führen.</strong> Anfang und Ende treffen sich an der Kerbe. Die 5 Adern (5V, GND, DIN vom Anfang, 5V, GND vom Ende) zusammenfassen und durch die Kerbe nach außen, mit JST-Stecker.</li><li><strong>Lichttest vor dem Schließen.</strong> Opalscheibe auflegen, Ring in Grün, Gelb und Rot leuchten lassen und prüfen, ob die Fläche gleichmäßig ist. Erst dann K5 verschrauben.</li></ol>
+<h3 id="gleichmaessigkeit">Gleichmäßigkeit</h3>
+<p>Mit LEDs nur am Rand ist die Mitte etwas dunkler als der Rand (im Simulator so dargestellt) - das sieht aus wie eine Ringleuchte und wirkt meist gut. Wenn die Fläche ganz gleichmäßig sein soll:</p>
+<ul><li><strong>Zweiter Ring innen:</strong> 24-30 LEDs auf der Rückwand bei ca. Ø 180 mm, nach vorn gerichtet. Bei 54 mm Abstand zur Opalscheibe verschwimmen sie gut. Zusammen ca. 90 LEDs.</li><li><strong>Opal mit höherer Streuung</strong> (Lichtdurchlässigkeit ca. 30 %) - gleichmäßiger, aber dunkler.</li><li><strong>Halo (optional):</strong> ein zusätzlicher Streifen außen an der Rückseite der Ringwand, zur Wand gerichtet, erzeugt den farbigen Lichthof wie im Simulator.</li></ul>
+<h3 id="verkabelung-zum-display">Verkabelung zum Display</h3>
+<pre><code>Pi GPIO10 -&gt; 74AHCT125 -&gt; 330R -&gt; Ziffern (LED 0-41) -&gt; Kabelbrücke -&gt; Ring (LED 42-101)
+5V/GND vom Netzteil:  Ziffern-Einspeisung  +  beide Enden des Rings</code></pre>
+<p>Das Kabel läuft aus der Kerbe in K2 durch eine kleine Kabelbrücke (3D-Druck oder Holzkanal 12 x 12 mm, 40 mm lang) in die Kerbe links in D2. Bei getrennter Montage (zwei Einzelgehäuse) bis ca. 2 m Kabel möglich, dann 0,75 mm2 für 5V/GND.</p>
+<h2 id="displaykasten-bauen-kurzfassung">Displaykasten bauen (Kurzfassung)</h2>
+<ol><li>D1-D5 verleimen, Einschraubmuttern in D4/D5 eindrehen.</li><li>Pi Zero 2 W mit Abstandsbolzen M2.5 auf D1, Platine mit 74AHCT125 und Sicherung daneben.</li><li>Auf D6: 14 Streifenstücke a 3 LEDs auf die gravierten Felder kleben, Reihenfolge 1a-1b-...-1g-2a-...-2g. Verbindungen hinten durch die Bohrungen.</li><li>INMP441 auf Moosgummi im Mikrofonschacht, Schallöffnung zur Front.</li><li>D6 + 4x D7 verleimen (innen weiß lackiert), Kabel durch den Schlitz in D6 zur Elektronik.</li><li>Front D8 + D9 auflegen, alles mit 4x M3 x 40 verschrauben.</li></ol>
+<h2 id="laserhinweise">Laserhinweise</h2>
+<ul><li>Farben: rot = schneiden, blau = ritzen/gravieren (Linie), schwarz = flächig gravieren.</li><li>Maße ohne Kerf-Kompensation. Für Passungen (Zentrierkern, Bohrungen) ggf. Probeschnitt machen.</li><li>Die Gravur "dB(A)" auf D9 ist Text in Baloo: vor dem Lasern in Pfade umwandeln (Inkscape: Pfad &gt; Objekt in Pfad) oder Schrift installieren. Auf Rauchglas von hinten gravieren, dann bleibt die Front glatt.</li><li>Bettgröße: Kreisteile brauchen 364 x 364 mm, G1 braucht 644 x 364 mm.</li></ul></article></div>
+</main>
+<footer>
+  Makerspace Uni Stuttgart · Lärmampel · Konzept und Simulation, keine geeichte Messung
+</footer>
+</body>
+</html>

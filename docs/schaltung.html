@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lärmampel - Schaltung - Lärmampel</title>
+<meta name="description" content="Lärmampel - ein Makerspace-Projekt">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="assets/logos/spacie-green.svg">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <a href="index.html" class="name">Lärmampel</a>
+    <span class="sub">Makerspace-Projekt</span>
+  </div>
+  <div class="logos">
+    <img src="assets/logos/Makerspace.svg" alt="Makerspace Uni Stuttgart">
+    <img class="tik" src="assets/logos/tik-logo.svg" alt="TIK">
+  </div>
+</header>
+<nav class="main"><a href="index.html">Start</a><a href="simulator/index.html">Simulator</a><a href="teileliste.html">Teileliste</a><a href="schaltung.html" class="on">Schaltung</a><a href="gehaeuse.html">Gehäuse & Bau</a><a href="tacho.html">Tacho-Variante</a></nav>
+<div class="titleline"></div>
+<main>
+<div class="doclayout"><aside class="toc"><h2>Inhalt</h2><ul><li><a href="#uebersicht">Übersicht</a></li><li><a href="#pinbelegung-raspberry-pi-zero-2-w-40-pol-stiftleiste">Pinbelegung Raspberry Pi Zero 2 W (40-pol. Stiftleiste)</a></li><li><a href="#inmp441">INMP441</a></li><li><a href="#pegelwandler-74ahct125-u1">Pegelwandler 74AHCT125 (U1)</a></li><li><a href="#led-kette-bogen-ziffern">LED-Kette (Bogen + Ziffern)</a></li><li><a href="#strombudget">Strombudget</a></li><li><a href="#hinweise">Hinweise</a></li><li><a href="#konfiguration-boot-firmware-config-txt">Konfiguration (/boot/firmware/config.txt)</a></li><li><a href="#mikrofon-und-messgenauigkeit-inmp441-datenblatt">Mikrofon und Messgenauigkeit (INMP441, Datenblatt)</a></li><li><a href="#variante-b-farbkreis-display">Variante B - Farbkreis + Display</a></li></ul></aside><article class="doc"><h1>Lärmampel - Schaltung</h1><p class="srcnote">Quelle: <code>SCHALTUNG.md</code></p><p>Raspberry Pi Zero 2 W + INMP441 (I2S) + WS2812B-Kette (SPI) + 5-V-Netzteil. WS2812B-Kette: 45 LEDs Bogen + 2 x 21 LEDs 7-Segment-Ziffern = 87 LEDs (Aufbau siehe <code>VISUALISIERUNG.md</code>). Teilenummern (Pos) beziehen sich auf <code>TEILELISTE.md</code>.</p>
+<h2 id="uebersicht">Übersicht</h2>
+<pre><code>                 +-----------+   Sicherung 4A
+ Netzteil 5V/4A -| Buchse    |----[ F1 ]----+-----------------------+------------------+
+                 +-----------+              |                       |                  |
+                      | GND                 |  5V                 + C1 1000uF          |
+                      |                     |                       |                  |
+                      |              +------+------+                |                  |
+                      |              | Pi Zero 2 W |                |                  |
+                      |              |  Pin 2 (5V) |                |                  |
+   INMP441            |              |             |           +----+-----+   +--------+-------+
+   +--------+         |              |  GPIO10 ----+--&gt; U1 -330R--&gt; DIN   |   | 5V (Einspeisung |
+   | VDD ---+---------+--------------+- 3V3 Pin 1  |  74AHCT125| Bogen    |--&gt;| 2) Ziffer 10er  |--&gt;
+   | GND ---+---------+--------------+- GND Pin 6  |           | LED 0-44 |   | LED 45-65       |
+   | SCK ---+------------------------+- GPIO18 Pin12           +----------+   +-----------------+
+   | WS  ---+------------------------+- GPIO19 Pin35
+   | SD  ---+------------------------+- GPIO20 Pin38           --&gt; Ziffer 1er LED 66-86
+   | L/R ---+-- GND                  +-------------+
+   +--------+                                     (GND aller Teile sternförmig am Netzteil-Minus)</code></pre>
+<h2 id="pinbelegung-raspberry-pi-zero-2-w-40-pol-stiftleiste">Pinbelegung Raspberry Pi Zero 2 W (40-pol. Stiftleiste)</h2>
+<div class="table-wrap"><table><thead><tr><th style="text-align:right">Pin</th><th style="text-align:left">Signal</th><th style="text-align:left">geht an</th></tr></thead><tbody><tr><td style="text-align:right">1</td><td style="text-align:left">3V3</td><td style="text-align:left">INMP441 VDD</td></tr><tr><td style="text-align:right">2</td><td style="text-align:left">5V</td><td style="text-align:left">Versorgung aus Netzteil (hinter Sicherung)</td></tr><tr><td style="text-align:right">6</td><td style="text-align:left">GND</td><td style="text-align:left">gemeinsame Masse</td></tr><tr><td style="text-align:right">12</td><td style="text-align:left">GPIO18 / PCM_CLK</td><td style="text-align:left">INMP441 SCK</td></tr><tr><td style="text-align:right">35</td><td style="text-align:left">GPIO19 / PCM_FS</td><td style="text-align:left">INMP441 WS</td></tr><tr><td style="text-align:right">38</td><td style="text-align:left">GPIO20 / PCM_DIN</td><td style="text-align:left">INMP441 SD</td></tr><tr><td style="text-align:right">19</td><td style="text-align:left">GPIO10 / SPI0_MOSI</td><td style="text-align:left">74AHCT125 Pin 2 (1A)</td></tr><tr><td style="text-align:right">3</td><td style="text-align:left">GPIO2 / SDA</td><td style="text-align:left">optional DS3231 SDA</td></tr><tr><td style="text-align:right">5</td><td style="text-align:left">GPIO3 / SCL</td><td style="text-align:left">optional DS3231 SCL</td></tr><tr><td style="text-align:right">11</td><td style="text-align:left">GPIO17</td><td style="text-align:left">optional Taster gegen GND (interner Pull-up)</td></tr></tbody></table></div>
+<p>Alternative Zifferanzeige HT16K33 (Pos 20) hängt ebenfalls an I2C (GPIO2/3), Adresse 0x70 - kollidiert nicht mit der DS3231 (0x68).</p>
+<p>GPIO18 ist durch I2S belegt. Die LEDs deshalb über SPI (GPIO10) treiben, nicht über PWM an GPIO18.</p>
+<h2 id="inmp441">INMP441</h2>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">INMP441</th><th style="text-align:left">Pi</th></tr></thead><tbody><tr><td style="text-align:left">VDD</td><td style="text-align:left">3V3 (Pin 1) - niemals 5 V</td></tr><tr><td style="text-align:left">GND</td><td style="text-align:left">GND</td></tr><tr><td style="text-align:left">SCK</td><td style="text-align:left">GPIO18</td></tr><tr><td style="text-align:left">WS</td><td style="text-align:left">GPIO19</td></tr><tr><td style="text-align:left">SD</td><td style="text-align:left">GPIO20</td></tr><tr><td style="text-align:left">L/R</td><td style="text-align:left">GND (= linker Kanal)</td></tr></tbody></table></div>
+<ul><li>Leitungen kurz halten (&lt; 15-20 cm), I2S ist empfindlich auf lange Kabel.</li><li>Mikrofon mit der Schallöffnung zur Gehäusefront, auf Moosgummi gelagert, nicht direkt auf dem Netzteil oder der LED-Matrix (Wärme, Körperschall).</li><li>Die Schallöffnung des Moduls liegt je nach Board auf der Unterseite.</li></ul>
+<h2 id="pegelwandler-74ahct125-u1">Pegelwandler 74AHCT125 (U1)</h2>
+<pre><code>                +----U----+
+        GND --1-| 1OE  VCC|-14-- 5V  (100 nF nach GND direkt am Pin)
+     GPIO10 --2-| 1A   4OE|-13-- 5V
+330R -&gt; DIN &lt;-3-| 1Y   4A |-12-- GND
+         5V --4-| 2OE  4Y |-11-- offen
+        GND --5-| 2A   3OE|-10-- 5V
+      offen --6-| 2Y   3A |-9--- GND
+        GND --7-| GND  3Y |-8--- offen
+                +---------+</code></pre>
+<ul><li>Pin 1 (1OE) auf GND = Kanal 1 aktiv.</li><li>Pin 3 (1Y) über 330 Ohm an DIN der Matrix.</li><li>Unbenutzte OE-Eingänge (4, 10, 13) auf 5 V, unbenutzte A-Eingänge (5, 9, 12) auf GND.</li><li>Der 74AHCT125 hat TTL-Eingangsschwellen, 3,3 V vom Pi werden sicher als High erkannt.</li></ul>
+<h2 id="led-kette-bogen-ziffern">LED-Kette (Bogen + Ziffern)</h2>
+<ul><li>Eine einzige Datenleitung: DOUT des Bogens (LED 44) -&gt; DIN der Zehnerziffer, deren DOUT -&gt; DIN der Einerziffer. Datenrichtung beachten (Pfeil auf dem Streifen).</li><li>Die Ziffernsegmente sind je 3 LEDs lange Streifenstücke (50 mm), mit kurzen 3-adrigen Litzen (5V, DIN/DOUT, GND) in Segmentreihenfolge a-b-c-d-e-f-g verbunden.</li><li>5 V und GND mit 0,5 mm2 direkt vom Netzteil, nicht über den Pi. Zweite Einspeisung am Anfang der Ziffern (LED 45), damit die vielen Lötbrücken keinen Spannungsabfall verursachen.</li><li>C1 1000 uF direkt an der ersten Einspeisung (Polung beachten).</li></ul>
+<h2 id="strombudget">Strombudget</h2>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">Verbraucher</th><th style="text-align:right">Strom</th></tr></thead><tbody><tr><td style="text-align:left">Pi Zero 2 W unter Last</td><td style="text-align:right">ca. 0,5 A</td></tr><tr><td style="text-align:left">87 LEDs, eine Grundfarbe (rot/grün), 100 %</td><td style="text-align:right">ca. 1,7 A</td></tr><tr><td style="text-align:left">87 LEDs, gelb (rot + grün), 100 %</td><td style="text-align:right">ca. 3,5 A</td></tr><tr><td style="text-align:left">87 LEDs, weiß, 100 %</td><td style="text-align:right">ca. 5,2 A (nie zulassen)</td></tr></tbody></table></div>
+<p>In der Praxis leuchten nie alle LEDs voll (Bogen nur bis zum Pegel, Ziffer "88" = 42 LEDs). Helligkeit in der Software auf ca. 70 % begrenzen, dann bleibt das Gesamtsystem sicher unter 3 A. Die Sicherung schützt bei Fehlern.</p>
+<h2 id="hinweise">Hinweise</h2>
+<ul><li>Einspeisung über Pin 2 umgeht die Polyfuse des Pi - daher die externe Sicherung F1.</li><li>Keine Spannung gleichzeitig über den Micro-USB-Port des Pi einspeisen.</li><li>Alle Massen verbinden (Netzteil, Pi, 74AHCT125, LEDs, Mikrofon).</li></ul>
+<h2 id="konfiguration-boot-firmware-config-txt">Konfiguration (/boot/firmware/config.txt)</h2>
+<pre><code>dtparam=spi=on
+dtparam=i2s=on
+# INMP441 als I2S-Mikrofon; verbreitet ist das Overlay der Google VoiceHAT,
+# Alternative: adau7002-simple. Vor dem Einsatz mit arecord -l prüfen.
+dtoverlay=googlevoicehat-soundcard
+# optional RTC
+# dtoverlay=i2c-rtc,ds3231</code></pre>
+<p>Funktionstest Mikrofon:</p>
+<pre><code>arecord -l
+arecord -D plughw:0 -c1 -r 48000 -f S32_LE -t wav -d 5 test.wav</code></pre>
+<h2 id="mikrofon-und-messgenauigkeit-inmp441-datenblatt">Mikrofon und Messgenauigkeit (INMP441, Datenblatt)</h2>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">Kenngröße</th><th style="text-align:left">Wert</th></tr></thead><tbody><tr><td style="text-align:left">Empfindlichkeit</td><td style="text-align:left">-26 dBFS @ 94 dB SPL, Toleranz +-1 dB</td></tr><tr><td style="text-align:left">Eigenrauschen (EIN)</td><td style="text-align:left">ca. 33 dB(A) SPL</td></tr><tr><td style="text-align:left">Signal-Rausch-Abstand</td><td style="text-align:left">61 dB(A)</td></tr><tr><td style="text-align:left">Max. Schalldruck (AOP)</td><td style="text-align:left">120 dB SPL</td></tr><tr><td style="text-align:left">Frequenzgang</td><td style="text-align:left">ca. 60 Hz - 15 kHz</td></tr></tbody></table></div>
+<p>Praktisch nutzbarer Bereich: ca. 40-115 dB(A). Ein Klassenraum liegt bei 35-90 dB(A) und wird damit bis auf sehr leise Stillarbeit abgedeckt.</p>
+<h3 id="einordnung-der-genauigkeit">Einordnung der Genauigkeit</h3>
+<div class="table-wrap"><table><thead><tr><th style="text-align:left">Aufbau</th><th style="text-align:left">Genauigkeit</th></tr></thead><tbody><tr><td style="text-align:left">ohne Kalibrierung, nur Datenblattwert</td><td style="text-align:left">ca. +-2-3 dB</td></tr><tr><td style="text-align:left">mit A-Bewertung in Software und einmaliger Kalibrierung gegen Klasse-2-Messgerät</td><td style="text-align:left">ca. +-1-2 dB</td></tr><tr><td style="text-align:left">zum Vergleich: Smartphone-App</td><td style="text-align:left">+-2-5 dB, je nach Gerät</td></tr><tr><td style="text-align:left">geeichter Schallpegelmesser Klasse 1</td><td style="text-align:left">+-0,7 dB</td></tr></tbody></table></div>
+<ul><li>Kalibrieren im fertig eingebauten Zustand - Gehäuse und Schallöffnung ändern den Frequenzgang.</li><li>Ohne A-Bewertung liegt der Wert durch tieffrequente Geräusche (Lüftung, Stühlerücken) einige dB über dem gehörrichtigen dB(A)-Wert.</li><li>Für die Ampel genügt das: 1 dB ist etwa die kleinste hörbare Änderung, die Schwellen werden ohnehin nach Erfahrung gesetzt.</li><li>Nicht geeignet für rechtsverbindliche Messungen (Arbeitsschutz, LärmVibrationsArbSchV, DIN EN IEC 61672).</li></ul>
+<hr>
+<h2 id="variante-b-farbkreis-display">Variante B - Farbkreis + Display</h2>
+<p>Pi, Mikrofon und Pegelwandler wie oben. Geänderte LED-Kette (102 LEDs):</p>
+<pre><code>GPIO10 -&gt; 74AHCT125 -&gt; 330R -&gt; Ziffer 1 (LED 0-20) -&gt; Ziffer 2 (LED 21-41)
+       -&gt; JST -&gt; Kabelbrücke -&gt; Ring Anfang (LED 42) ... Ring Ende (LED 101)
+
+5V/GND:  Netzteil -&gt; F1 4A -&gt; Ziffern-Einspeisung
+                           -&gt; JST -&gt; Ring Anfang (5V, GND)
+                           -&gt; JST -&gt; Ring Ende   (5V, GND)</code></pre>
+<ul><li>C1 1000 uF an der Ziffern-Einspeisung, ein zweiter 470-1000 uF am Ring-Anfang.</li><li>Ring an beiden Enden einspeisen, damit die Farbe rundherum gleich bleibt.</li><li>Strom: 102 LEDs in Grün oder Rot bei 70 % ca. 1,4 A, in Gelb ca. 2,3 A (+0,5 A Pi). Mit Zusatzring innen und Halo: Netzteil 5 V / 6 A, Sicherung 6 A.</li><li>Details zum Aufbau: <code>GEHAEUSE_FARBKREIS.md</code>.</li></ul></article></div>
+</main>
+<footer>
+  Makerspace Uni Stuttgart · Lärmampel · Konzept und Simulation, keine geeichte Messung
+</footer>
+</body>
+</html>
