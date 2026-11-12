@@ -1,11 +1,11 @@
-# Laermampel - Schaltung
+# Lärmampel - Schaltung
 
 Raspberry Pi Zero 2 W + INMP441 (I2S) + WS2812B-Kette (SPI) + 5-V-Netzteil.
 WS2812B-Kette: 45 LEDs Bogen + 2 x 21 LEDs 7-Segment-Ziffern = 87 LEDs
 (Aufbau siehe `VISUALISIERUNG.md`).
 Teilenummern (Pos) beziehen sich auf `TEILELISTE.md`.
 
-## Uebersicht
+## Übersicht
 
 ```
                  +-----------+   Sicherung 4A
@@ -24,7 +24,7 @@ Teilenummern (Pos) beziehen sich auf `TEILELISTE.md`.
    | WS  ---+------------------------+- GPIO19 Pin35
    | SD  ---+------------------------+- GPIO20 Pin38           --> Ziffer 1er LED 66-86
    | L/R ---+-- GND                  +-------------+
-   +--------+                                     (GND aller Teile sternfoermig am Netzteil-Minus)
+   +--------+                                     (GND aller Teile sternförmig am Netzteil-Minus)
 ```
 
 ## Pinbelegung Raspberry Pi Zero 2 W (40-pol. Stiftleiste)
@@ -42,11 +42,11 @@ Teilenummern (Pos) beziehen sich auf `TEILELISTE.md`.
 | 5 | GPIO3 / SCL | optional DS3231 SCL |
 | 11 | GPIO17 | optional Taster gegen GND (interner Pull-up) |
 
-Alternative Zifferanzeige HT16K33 (Pos 20) haengt ebenfalls an I2C (GPIO2/3),
+Alternative Zifferanzeige HT16K33 (Pos 20) hängt ebenfalls an I2C (GPIO2/3),
 Adresse 0x70 - kollidiert nicht mit der DS3231 (0x68).
 
-GPIO18 ist durch I2S belegt. Die LEDs deshalb ueber SPI (GPIO10) treiben,
-nicht ueber PWM an GPIO18.
+GPIO18 ist durch I2S belegt. Die LEDs deshalb über SPI (GPIO10) treiben,
+nicht über PWM an GPIO18.
 
 ## INMP441
 
@@ -60,9 +60,9 @@ nicht ueber PWM an GPIO18.
 | L/R | GND (= linker Kanal) |
 
 - Leitungen kurz halten (< 15-20 cm), I2S ist empfindlich auf lange Kabel.
-- Mikrofon mit der Schalloeffnung zur Gehaeusefront, auf Moosgummi gelagert,
-  nicht direkt auf dem Netzteil oder der LED-Matrix (Waerme, Koerperschall).
-- Die Schalloeffnung des Moduls liegt je nach Board auf der Unterseite.
+- Mikrofon mit der Schallöffnung zur Gehäusefront, auf Moosgummi gelagert,
+  nicht direkt auf dem Netzteil oder der LED-Matrix (Wärme, Körperschall).
+- Die Schallöffnung des Moduls liegt je nach Board auf der Unterseite.
 
 ## Pegelwandler 74AHCT125 (U1)
 
@@ -79,19 +79,19 @@ nicht ueber PWM an GPIO18.
 ```
 
 - Pin 1 (1OE) auf GND = Kanal 1 aktiv.
-- Pin 3 (1Y) ueber 330 Ohm an DIN der Matrix.
-- Unbenutzte OE-Eingaenge (4, 10, 13) auf 5 V, unbenutzte A-Eingaenge (5, 9, 12) auf GND.
+- Pin 3 (1Y) über 330 Ohm an DIN der Matrix.
+- Unbenutzte OE-Eingänge (4, 10, 13) auf 5 V, unbenutzte A-Eingänge (5, 9, 12) auf GND.
 - Der 74AHCT125 hat TTL-Eingangsschwellen, 3,3 V vom Pi werden sicher als High erkannt.
 
 ## LED-Kette (Bogen + Ziffern)
 
 - Eine einzige Datenleitung: DOUT des Bogens (LED 44) -> DIN der Zehnerziffer,
   deren DOUT -> DIN der Einerziffer. Datenrichtung beachten (Pfeil auf dem Streifen).
-- Die Ziffernsegmente sind je 3 LEDs lange Streifenstuecke (50 mm), mit kurzen
+- Die Ziffernsegmente sind je 3 LEDs lange Streifenstücke (50 mm), mit kurzen
   3-adrigen Litzen (5V, DIN/DOUT, GND) in Segmentreihenfolge a-b-c-d-e-f-g verbunden.
-- 5 V und GND mit 0,5 mm2 direkt vom Netzteil, nicht ueber den Pi.
+- 5 V und GND mit 0,5 mm2 direkt vom Netzteil, nicht über den Pi.
   Zweite Einspeisung am Anfang der Ziffern (LED 45), damit die vielen
-  Loetbruecken keinen Spannungsabfall verursachen.
+  Lötbrücken keinen Spannungsabfall verursachen.
 - C1 1000 uF direkt an der ersten Einspeisung (Polung beachten).
 
 ## Strombudget
@@ -99,19 +99,19 @@ nicht ueber PWM an GPIO18.
 | Verbraucher | Strom |
 |-------------|------:|
 | Pi Zero 2 W unter Last | ca. 0,5 A |
-| 87 LEDs, eine Grundfarbe (rot/gruen), 100 % | ca. 1,7 A |
-| 87 LEDs, gelb (rot + gruen), 100 % | ca. 3,5 A |
-| 87 LEDs, weiss, 100 % | ca. 5,2 A (nie zulassen) |
+| 87 LEDs, eine Grundfarbe (rot/grün), 100 % | ca. 1,7 A |
+| 87 LEDs, gelb (rot + grün), 100 % | ca. 3,5 A |
+| 87 LEDs, weiß, 100 % | ca. 5,2 A (nie zulassen) |
 
 In der Praxis leuchten nie alle LEDs voll (Bogen nur bis zum Pegel, Ziffer
 "88" = 42 LEDs). Helligkeit in der Software auf ca. 70 % begrenzen, dann bleibt
-das Gesamtsystem sicher unter 3 A. Die Sicherung schuetzt bei Fehlern.
+das Gesamtsystem sicher unter 3 A. Die Sicherung schützt bei Fehlern.
 
 ## Hinweise
 
-- Einspeisung ueber Pin 2 umgeht die Polyfuse des Pi - daher die externe Sicherung F1.
-- Keine Spannung gleichzeitig ueber den Micro-USB-Port des Pi einspeisen.
-- Alle Massen verbinden (Netzteil, Pi, 74AHCT125, Matrix, Mikrofon).
+- Einspeisung über Pin 2 umgeht die Polyfuse des Pi - daher die externe Sicherung F1.
+- Keine Spannung gleichzeitig über den Micro-USB-Port des Pi einspeisen.
+- Alle Massen verbinden (Netzteil, Pi, 74AHCT125, LEDs, Mikrofon).
 
 ## Konfiguration (/boot/firmware/config.txt)
 
@@ -119,7 +119,7 @@ das Gesamtsystem sicher unter 3 A. Die Sicherung schuetzt bei Fehlern.
 dtparam=spi=on
 dtparam=i2s=on
 # INMP441 als I2S-Mikrofon; verbreitet ist das Overlay der Google VoiceHAT,
-# Alternative: adau7002-simple. Vor dem Einsatz mit arecord -l pruefen.
+# Alternative: adau7002-simple. Vor dem Einsatz mit arecord -l prüfen.
 dtoverlay=googlevoicehat-soundcard
 # optional RTC
 # dtoverlay=i2c-rtc,ds3231
@@ -134,7 +134,7 @@ arecord -D plughw:0 -c1 -r 48000 -f S32_LE -t wav -d 5 test.wav
 
 ## Mikrofon und Messgenauigkeit (INMP441, Datenblatt)
 
-| Kenngroesse | Wert |
+| Kenngröße | Wert |
 |-------------|------|
 | Empfindlichkeit | -26 dBFS @ 94 dB SPL, Toleranz +-1 dB |
 | Eigenrauschen (EIN) | ca. 33 dB(A) SPL |
@@ -143,18 +143,35 @@ arecord -D plughw:0 -c1 -r 48000 -f S32_LE -t wav -d 5 test.wav
 | Frequenzgang | ca. 60 Hz - 15 kHz |
 
 Praktisch nutzbarer Bereich: ca. 40-115 dB(A). Ein Klassenraum liegt bei
-35-90 dB(A) und wird damit voll abgedeckt. Siehe Antwort im Chat / README
-fuer die Einordnung der Genauigkeit.
+35-90 dB(A) und wird damit bis auf sehr leise Stillarbeit abgedeckt.
+
+### Einordnung der Genauigkeit
+
+| Aufbau | Genauigkeit |
+|--------|-------------|
+| ohne Kalibrierung, nur Datenblattwert | ca. +-2-3 dB |
+| mit A-Bewertung in Software und einmaliger Kalibrierung gegen Klasse-2-Messgerät | ca. +-1-2 dB |
+| zum Vergleich: Smartphone-App | +-2-5 dB, je nach Gerät |
+| geeichter Schallpegelmesser Klasse 1 | +-0,7 dB |
+
+- Kalibrieren im fertig eingebauten Zustand - Gehäuse und Schallöffnung ändern
+  den Frequenzgang.
+- Ohne A-Bewertung liegt der Wert durch tieffrequente Geräusche (Lüftung,
+  Stühlerücken) einige dB über dem gehörrichtigen dB(A)-Wert.
+- Für die Ampel genügt das: 1 dB ist etwa die kleinste hörbare Änderung, die
+  Schwellen werden ohnehin nach Erfahrung gesetzt.
+- Nicht geeignet für rechtsverbindliche Messungen (Arbeitsschutz,
+  LärmVibrationsArbSchV, DIN EN IEC 61672).
 
 ---
 
 ## Variante B - Farbkreis + Display
 
-Pi, Mikrofon und Pegelwandler wie oben. Geaenderte LED-Kette (102 LEDs):
+Pi, Mikrofon und Pegelwandler wie oben. Geänderte LED-Kette (102 LEDs):
 
 ```
 GPIO10 -> 74AHCT125 -> 330R -> Ziffer 1 (LED 0-20) -> Ziffer 2 (LED 21-41)
-       -> JST -> Kabelbruecke -> Ring Anfang (LED 42) ... Ring Ende (LED 101)
+       -> JST -> Kabelbrücke -> Ring Anfang (LED 42) ... Ring Ende (LED 101)
 
 5V/GND:  Netzteil -> F1 4A -> Ziffern-Einspeisung
                            -> JST -> Ring Anfang (5V, GND)
@@ -163,6 +180,6 @@ GPIO10 -> 74AHCT125 -> 330R -> Ziffer 1 (LED 0-20) -> Ziffer 2 (LED 21-41)
 
 - C1 1000 uF an der Ziffern-Einspeisung, ein zweiter 470-1000 uF am Ring-Anfang.
 - Ring an beiden Enden einspeisen, damit die Farbe rundherum gleich bleibt.
-- Strom: 102 LEDs in Gruen oder Rot bei 70 % ca. 1,4 A, in Gelb ca. 2,3 A
+- Strom: 102 LEDs in Grün oder Rot bei 70 % ca. 1,4 A, in Gelb ca. 2,3 A
   (+0,5 A Pi). Mit Zusatzring innen und Halo: Netzteil 5 V / 6 A, Sicherung 6 A.
 - Details zum Aufbau: `GEHAEUSE_FARBKREIS.md`.
