@@ -120,6 +120,29 @@ Holzkanal 12 x 12 mm, 40 mm lang) in die Kerbe links in D2.
 Bei getrennter Montage (zwei Einzelgehäuse) bis ca. 2 m Kabel möglich, dann
 0,75 mm2 für 5V/GND.
 
+## Alternative Bauweisen für den runden Korpus
+
+Die Vorlagen in `laser/` nutzen gestapelte Ringe. Andere Wege zum runden Gehäuse:
+
+| Bauweise | Vorteile | Nachteile |
+|----------|----------|-----------|
+| **Gestapelte Ringe** (Vorlagen K1-K5) | sehr stabil und maßhaltig, nur Lasern und Leimen, schöne Schichtkante | viel Verschnitt (9 Innenscheiben Ø 320, ca. 1,2 m2), lange Laserzeit, ca. 2 kg |
+| **Kerf-Bending** (Schlitzmuster, "Living Hinge") | kaum Verschnitt, leicht, glatte Außenseite | Muster per Probeschnitt abstimmen, Schlitze lassen Licht durch (innen bekleben oder weiß streichen) |
+| **3D-Druck in Segmenten** | LED-Halter, Kabelkanal und Schraubdome direkt integriert | 30-50 h Druckzeit bei Ø 360 x 54 mm |
+| **Fertigteil umbauen** (Tortenring, runde Holzschachtel, LED-Panel-Leuchte) | schnellster Prototyp | Maße vom Fertigteil vorgegeben |
+
+### Kerf-Bending im Detail
+
+- Streifen 1131 x 54 mm (Umfang π x 360), Pappelsperrholz 3 mm mit versetztem
+  Schlitzmuster. Biegebirke oder Flugzeugsperrholz 1,5 mm biegt sich bei diesem
+  Radius auch ohne Schlitze.
+- Formgeber: Rückwand Ø 354 mm (360 - 2 x 3 mm Streifendicke) und vorn ein schmaler
+  Ring, um den der Streifen gelegt und verleimt wird.
+- Stoß überlappend oder mit innenliegender Lasche verbinden.
+- Der Streifen ist für die meisten Laser zu lang: in 2-3 Stücke teilen und mit
+  Laschen verbinden.
+- Noch nicht im Generator enthalten - braucht die Bettgröße des Lasers.
+
 ## Displaykasten bauen (Kurzfassung)
 
 1. D1-D5 verleimen, Einschraubmuttern in D4/D5 eindrehen.
